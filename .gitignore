@@ -3,6 +3,21 @@
 # dependencies
 node_modules/
 
+# Virtual Environment
+venv
+
+# Chroma Database
+embeddings/
+
+# Data
+processed/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# 
+
 # Expo
 .expo/
 dist/
@@ -32,6 +47,7 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
 
 # typescript
 *.tsbuildinfo
