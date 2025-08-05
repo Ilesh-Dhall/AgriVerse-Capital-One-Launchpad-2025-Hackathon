@@ -1,8 +1,0 @@
-# API Keys and Secrets
-.env
-
-# Virtual Environment
-venv
-
-# Metadata Directories
-chroma_db
