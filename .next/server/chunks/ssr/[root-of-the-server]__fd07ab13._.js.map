@@ -1,0 +1,8 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 6, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 18, "column": 0}, "map": {"version":3,"sources":["file:///Users/shaansingh/dev/PROJECT/AgriVerse-Capital-One-Launchpad-2025-Hackathon/components/WelcomeCard.tsx"],"sourcesContent":["import React from \"react\";\n\nconst WelcomeCard = ({ name }: { name: string }) => {\n  return (\n    <div>\n      <h1 className=\"text-4xl\">Hello {name}</h1>\n    </div>\n  );\n};\n\nexport default WelcomeCard;\n"],"names":[],"mappings":";;;;;AAEA,MAAM,cAAc,CAAC,EAAE,IAAI,EAAoB;IAC7C,qBACE,8OAAC;kBACC,cAAA,8OAAC;YAAG,WAAU;;gBAAW;gBAAO;;;;;;;;;;;;AAGtC;uCAEe","debugId":null}},
+    {"offset": {"line": 47, "column": 0}, "map": {"version":3,"sources":["file:///Users/shaansingh/dev/PROJECT/AgriVerse-Capital-One-Launchpad-2025-Hackathon/app/page.tsx"],"sourcesContent":["import WelcomeCard from \"@/components/WelcomeCard\";\nimport { Andika } from \"next/font/google\";\n\nconst a = Andika({ weight: \"600\", subsets: [\"latin\"] });\n\nexport default function Home() {\n  return (\n    <div className={a.className}>\n      <WelcomeCard name=\"Test\" />\n    </div>\n  );\n}\n"],"names":[],"mappings":";;;;AAAA;;;;;;;;;AAKe,SAAS;IACtB,qBACE,8OAAC;QAAI,WAAW,EAAE,SAAS;kBACzB,cAAA,8OAAC,0HAAA,CAAA,UAAW;YAAC,MAAK;;;;;;;;;;;AAGxB","debugId":null}}]
+}
