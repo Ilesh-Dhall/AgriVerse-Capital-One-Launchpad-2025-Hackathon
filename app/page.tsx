@@ -63,14 +63,13 @@ export default function Home() {
             <h2 className="text-xl mt-4 mb-8 w-100">
               Get instant, expert advice for your crops in your own language
             </h2>
-            <Button
-              variant={"outline"}
-              size={"lg"}
-              className="p-7 rounded-full text-xl font-logo border-green-800 border-2"
+            <a
+              href="/dashboard"
+              className="flex gap-2 items-center justify-center hover:bg-green-800 hover:text-white transition-all duration-300 w-fit p-4 rounded-full text-xl font-logo border-green-800 border-2"
             >
               Ask AgriVerse
               <ArrowRight strokeWidth={3} className="" />
-            </Button>
+            </a>
           </div>
         </main>
       </section>
