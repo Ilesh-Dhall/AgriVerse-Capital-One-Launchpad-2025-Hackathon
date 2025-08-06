@@ -2,7 +2,6 @@
 
 # dependencies
 node_modules/
-
 # Environment
 .env
 venv
@@ -48,3 +47,5 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.next/
+
