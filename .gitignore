@@ -17,6 +17,7 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+.next/
 
 # Metro
 .metro-health-check*
@@ -36,3 +37,58 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+# dependencies
+node_modules/
+
+# Virtual Environment
+venv
+
+# Chroma Database
+embeddings/
+
+# Data
+processed/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# 
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+.env
+
+# typescript
+*.tsbuildinfo
+
+app-example
