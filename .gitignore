@@ -3,6 +3,18 @@
 # dependencies
 node_modules/
 
+# Environment
+.env
+venv
+
+# Cache
+__pycache__/
+
+# Vector Database
+embeddings/
+processed
+
+
 # Expo
 .expo/
 dist/
