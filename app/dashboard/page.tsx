@@ -1,107 +1,149 @@
 "use client";
-import { createElement, JSX, useState } from "react";
-import Chat from "@/components/Chat";
-import Crops from "@/components/Crops";
-import Profile from "@/components/Profile";
-import Dashboard from "@/components/Dashboard";
-import HeaderBox from "@/components/ui/HeaderBox";
+
+import { useEffect, useMemo } from "react";
 import {
-  Bell,
-  Database,
-  Leaf,
-  Settings,
-  Star,
-  User,
-  Wheat,
-} from "lucide-react";
+  SidebarProvider,
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Bell, Languages, Search, MessageSquare, Sprout, CloudSun, LineChart as LineChartIcon, Wallet, ShieldAlert, BookOpen, Users } from "lucide-react";
+// Dashboard section components
+import AIChatAssistant from "@/components/dashboard/AIChatAssistant";
+import FarmProfile from "@/components/dashboard/FarmProfile";
+import WeatherClimate from "@/components/dashboard/WeatherClimate";
+import MarketIntelligence from "@/components/dashboard/MarketIntelligence";
+import FinancialPlanning from "@/components/dashboard/FinancialPlanning";
+import CropHealthMonitor from "@/components/dashboard/CropHealthMonitor";
+import KnowledgeLibrary from "@/components/dashboard/KnowledgeLibrary";
+import CommunitySupport from "@/components/dashboard/CommunitySupport";
+import QuickActions from "@/components/dashboard/QuickActions";
+import Notifications from "@/components/dashboard/Notifications";
+export default function Dashboard() {
+  const hash =
+    typeof window !== "undefined" ? window.location.hash || "#ai" : "#ai";
 
-const pages: {
-  name: string;
-  component: JSX.ElementType;
-  icon: JSX.ElementType;
-}[] = [
-  {
-    name: "Chat",
-    component: Chat,
-    icon: Star,
-  },
-  {
-    name: "Dashboard",
-    component: Dashboard,
-    icon: Database,
-  },
-  {
-    name: "Crops",
-    component: Crops,
-    icon: Wheat,
-  },
-  {
-    name: "Profile",
-    component: Profile,
-    icon: User,
-  },
-] as const;
+  useEffect(() => {
+    document.title = "AgriVerse Dashboard — AI Farming Assistant";
+    const desc =
+      "Your centralized farm intelligence hub: chat, weather, market, finance, and crop health.";
+    const ensure = (selector: string, creator: () => HTMLElement) => {
+      let el = document.head.querySelector(selector) as HTMLElement | null;
+      if (!el) {
+        el = creator();
+        document.head.appendChild(el);
+      }
+      return el as HTMLMetaElement;
+    };
+    const metaDesc = ensure('meta[name="description"]', () => {
+      const m = document.createElement("meta");
+      m.setAttribute("name", "description");
+      return m;
+    });
+    metaDesc.setAttribute("content", desc);
+    const linkCanonical = ensure('link[rel="canonical"]', () => {
+      const l = document.createElement("link");
+      l.setAttribute("rel", "canonical");
+      return l;
+    });
+    linkCanonical.setAttribute("href", window.location.origin + "/dashboard");
+  }, []);
 
-type PageType = (typeof pages)[number]["name"];
-
-export default function Page() {
-  const [page, setPage] = useState<PageType>("Chat");
+  const items = useMemo(
+    () => [
+      { id: "ai", label: "AI Assistant", icon: MessageSquare },
+      { id: "farm", label: "My Farm", icon: Sprout },
+      { id: "weather", label: "Weather", icon: CloudSun },
+      { id: "market", label: "Market", icon: LineChartIcon },
+      { id: "finance", label: "Finance", icon: Wallet },
+      { id: "health", label: "Crop Health", icon: ShieldAlert },
+      { id: "knowledge", label: "Knowledge", icon: BookOpen },
+      { id: "community", label: "Community", icon: Users },
+    ],
+    []
+  );
 
   return (
-    <div className="flex flex-col h-screen">
-      <nav className="flex justify-between w-full p-5 pb-0">
-        <HeaderBox bottom="dotted">
-          <Leaf color="green" strokeWidth={3} size={30} />
-          <h1 className="font-logo text-2xl font-black">Agriverse</h1>
-        </HeaderBox>
-        <ul className="flex gap-2 items-center justify-center text-gray-800">
-          {pages.map((p) => (
-            <HeaderBox
-              className={`cursor-pointer self-end ${
-                page != p.name ? "hover:bg-green-900 hover:text-white" : ""
-              }`}
-              onClick={() => setPage(p.name)}
-              bottom={page == p.name ? "none" : "solid"}
-              key={p.name}
-            >
-              {<p.icon />}
-              {p.name}
-            </HeaderBox>
-          ))}
-        </ul>
-        <HeaderBox bottom="dotted">
-          <Button
-            size="lg"
-            className="size-10 rounded-full border-1 border-green-900 bg-white hover:bg-green-900 hover:text-white"
-            variant="secondary"
-          >
-            <Bell />
-          </Button>
-          <Button
-            size="icon"
-            className="size-10 rounded-full border-1 border-green-900 bg-white hover:bg-green-900 hover:text-white"
-            variant="secondary"
-          >
-            <Settings />
-          </Button>
-          <Avatar className="w-10 h-10">
-            <AvatarImage
-              className="rounded-full"
-              src="https://github.com/shadcn.png"
-            />
-            <AvatarFallback>CN</AvatarFallback>
-          </Avatar>
-        </HeaderBox>
-      </nav>
-      <main className="m-5 mt-0 overflow-scroll border-2 border-green-900 rounded-b-2xl h-full bg-white shadow-xl">
-        {pages.find((p) => p.name === page)?.component ? (
-          createElement(pages.find((p) => p.name === page)!.component)
-        ) : (
-          <div className="text-center text-gray-500">Page not found</div>
-        )}
-      </main>
-    </div>
+    <SidebarProvider>
+      <div className="min-h-svh flex w-full">
+        <Sidebar collapsible="icon">
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel>AgriVerse</SidebarGroupLabel>
+              <SidebarMenu>
+                {items.map((item) => (
+                  <SidebarMenuItem key={item.id}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={hash === `#${item.id}`}
+                    >
+                      <a href={`#${item.id}`}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroup>
+          </SidebarContent>
+        </Sidebar>
+
+        <SidebarInset>
+          <header className="sticky top-0 z-10 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+            <div className="container mx-auto flex h-14 items-center gap-3 px-4">
+              <SidebarTrigger className="mr-2" />
+              <div className="font-semibold">AgriVerse Dashboard</div>
+              <Separator orientation="vertical" className="mx-2 h-6" />
+              <div className="relative hidden md:flex max-w-md w-full">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search crops, prices, weather…"
+                  className="pl-8"
+                />
+              </div>
+              <div className="ml-auto flex items-center gap-2">
+                <Button variant="outline" size="sm" className="gap-1">
+                  <Languages className="h-4 w-4" />
+                  EN
+                </Button>
+                <Button variant="ghost" size="icon" aria-label="Notifications">
+                  <Bell />
+                </Button>
+              </div>
+            </div>
+          </header>
+
+          <main className="container mx-auto px-4 py-6 grid gap-6 lg:grid-cols-[1fr_320px]">
+            <section className="space-y-6">
+              <h1 className="text-2xl font-bold">
+                AgriVerse Dashboard — AI Farming Assistant
+              </h1>
+              <AIChatAssistant />
+              <FarmProfile />
+              <WeatherClimate />
+              <MarketIntelligence />
+              <FinancialPlanning />
+              <CropHealthMonitor />
+              <KnowledgeLibrary />
+              <CommunitySupport />
+            </section>
+            <aside className="space-y-6">
+              <QuickActions />
+              <Notifications />
+            </aside>
+          </main>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
-}
+
