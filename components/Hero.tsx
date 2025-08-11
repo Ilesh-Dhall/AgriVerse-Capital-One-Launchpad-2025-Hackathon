@@ -1,6 +1,15 @@
 import { Button } from "@/components/ui/button";
+import {
+  ArrowBigRight,
+  ArrowUpRight,
+  CircleArrowOutUpRight,
+  Leaf,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+import HeroText from "./ui/HeroText";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@radix-ui/react-separator";
 
 const Hero = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -25,7 +34,7 @@ const Hero = () => {
         ref={ref}
         className="relative isolate"
         style={{
-          backgroundImage: `url(/og-agri.jpg)`,
+          backgroundImage: `url(/aog-agri.jpg)`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -41,56 +50,80 @@ const Hero = () => {
         <div className="absolute inset-0 bg-background/70" aria-hidden="true" />
 
         <nav className="relative z-10 container mx-auto flex items-center justify-between py-6">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-md bg-gradient-primary shadow-[var(--shadow-elegant)]" />
-            <span className="text-xl font-semibold">AgriVerse</span>
-          </div>
-          <div className="hidden sm:flex items-center gap-6 text-sm text-muted-foreground">
-            <a className="story-link" href="#solution">
+          <Link href={"/"}>
+            <div className="flex items-center gap-2">
+              <Leaf color="green" />
+              <span className="text-xl font-semibold font-logo">AgriVerse</span>
+            </div>
+          </Link>
+          <div className="hidden sm:flex items-center gap-6 text-sm">
+            <Link className="story-link" href="#solution">
               Solution
-            </a>
-            <a className="story-link" href="#trust">
+            </Link>
+            <Link className="story-link" href="#trust">
               Trust
-            </a>
-            <a className="story-link" href="#access">
+            </Link>
+            <Link className="story-link" href="#access">
               Accessibility
-            </a>
-            <a className="story-link" href="#tech">
+            </Link>
+            <Link className="story-link" href="#tech">
               Tech
-            </a>
+            </Link>
           </div>
-          <Button variant="hero" asChild className="hidden sm:inline-flex">
+          <Button variant="default" className="sm:inline-flex bg-green-900">
             <Link href="/dashboard" aria-label="Open AgriVerse Dashboard">
-              Ask AgriVerse
+              Get Started
             </Link>
           </Button>
         </nav>
 
         <main className="relative z-10 container mx-auto grid lg:grid-cols-2 gap-10 items-center py-16 lg:py-24">
-          <div className="space-y-6 animate-enter">
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl leading-tight">
-              Your Intelligent Farming Companion
-            </h1>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-prose">
-              Get instant, expert advice for your crops in your own language.
-              Trusted, explainable answers grounded in public data and
-              agricultural science.
+          <div className="space-y-6 animate-in">
+            <HeroText />
+            <p className="text-lg sm:text-xl max-w-prose">
+              Revolutionizing agriculture with AI-powered insights and smart
+              farming solutions
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
-              <Button variant="hero" size="lg" asChild>
+              <Button variant="default" size="lg" asChild>
                 <Link href="/dashboard" aria-label="Open AgriVerse Dashboard">
                   Ask AgriVerse
                 </Link>
               </Button>
-              <Button variant="secondary" size="lg">
+              <Button variant="outline" size="lg">
                 Learn more
               </Button>
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
+            <div className="flex items-center gap-2 text-sm pt-2">
               <span>Powered by</span>
-              <span className="px-2 py-1 rounded border">ICAR</span>
-              <span className="px-2 py-1 rounded border">IMD</span>
-              <span className="px-2 py-1 rounded border">Agri Data Portal</span>
+              <Separator className="w-1 h-4 bg-foreground" />
+              <Link href={"https://icar.org.in/hi"} target="_blank">
+                <Badge
+                  variant="default"
+                  className="bg-green-100 text-green-800 border-2 border-green-900"
+                >
+                  <ArrowUpRight className="size-4" strokeWidth={3} />
+                  ICAR
+                </Badge>
+              </Link>
+              <Link href={"https://mausam.imd.gov.in/"} target="_blank">
+                <Badge
+                  variant="default"
+                  className="bg-green-100 text-green-800 border-2 border-green-900"
+                >
+                  <ArrowUpRight className="size-4" strokeWidth={3} />
+                  IMD
+                </Badge>
+              </Link>
+              <Link href={""} target="_blank">
+                <Badge
+                  variant="default"
+                  className="bg-green-100 text-green-800 border-2 border-green-900"
+                >
+                  <ArrowUpRight className="size-4" strokeWidth={3} />
+                  Agri Data Portal
+                </Badge>
+              </Link>
             </div>
           </div>
           <div className="relative">
@@ -107,8 +140,8 @@ const Hero = () => {
                 </div>
                 <div className="rounded-md border p-3 bg-card">
                   <p className="text-sm">
-                    Based on IMD forecast (temp 29–33°C, low rainfall) and soil
-                    moisture trends, irrigate on Wednesday morning for 3–4
+                    Based on IMD forecast (temp 29-33°C, low rainfall) and soil
+                    moisture trends, irrigate on Wednesday morning for 3-4
                     hours. Avoid late afternoon to reduce evaporation.
                   </p>
                   <ul className="list-disc pl-5 mt-2 text-sm text-muted-foreground">
