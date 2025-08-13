@@ -27,33 +27,22 @@ export default function AiPage() {
     document.title = "AI Farming Intelligence — AgriVerse";
   }, [messages]);
 
-  const simulateAiResponse = (userMessage: string) => {
-    const responses = {
-      "crop health":
-        "Based on satellite imagery and weather data, your crops show 92% health index. Detected minor nitrogen deficiency in sector B3. Recommend urea application of 50kg/hectare.",
-      weather:
-        "Next 7 days forecast: Light rain expected Thu-Fri (15-20mm). Temperature: 24-31°C. Perfect conditions for wheat sowing. Avoid spraying pesticides on rainy days.",
-      irrigation:
-        "Soil moisture at 45%. Recommend irrigation in 2-3 days. Optimal timing: 6-8 AM to reduce evaporation. Current ET₀: 4.2mm/day for your region.",
-      market:
-        "Today's mandi rates: Wheat ₹2,100/quintal (+2%), Rice ₹3,200/quintal (-1%). Export demand strong for basmati. Consider storage for better prices next month.",
-      fertilizer:
-        "NPK analysis shows: N-low, P-adequate, K-high. Apply DAP 100kg + Urea 75kg per hectare. Micronutrient zinc recommended based on soil test.",
-      default:
-        "I'm analyzing your query with real-time agricultural data. Our AI processes weather patterns, market trends, and soil conditions to provide personalized farming insights.",
-    };
+  const getAIResponse = async (userMessage: string): Promise<string> => {
+    try {
+      const response = await fetch("/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: userMessage }),
+      });
 
-    const query = userMessage.toLowerCase();
-    let response = responses.default;
-
-    for (const [key, value] of Object.entries(responses)) {
-      if (key !== "default" && query.includes(key)) {
-        response = value;
-        break;
-      }
+      const data = await response.json();
+      return data.response;
+    } catch (error) {
+      console.error("Error getting AI response:", error);
+      return "I'm sorry, I'm having trouble connecting right now. Please try again in a moment.";
     }
-
-    return response;
   };
 
   const handleSendMessage = async () => {
@@ -67,21 +56,33 @@ export default function AiPage() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const currentInput = inputText;
     setInputText("");
     setIsTyping(true);
 
-    // Simulate AI response delay
-    setTimeout(() => {
+    try {
+      const aiResponseText = await getAIResponse(currentInput);
+
       const aiResponse = {
         id: Date.now() + 1,
         type: "ai",
-        text: simulateAiResponse(inputText),
+        text: aiResponseText,
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, aiResponse]);
+    } catch (error) {
+      console.error("Error in handleSendMessage:", error);
+      const errorResponse = {
+        id: Date.now() + 1,
+        type: "ai",
+        text: "I'm sorry, I encountered an error. Please try again.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorResponse]);
+    } finally {
       setIsTyping(false);
-    }, 1500 + Math.random() * 1000);
+    }
   };
 
   const handleQuickTemplate = (template: string) => {
@@ -97,10 +98,13 @@ export default function AiPage() {
   };
 
   return (
-    <div className="p-6">
+    <div
+      className="p-6 flex flex-col gap-6"
+      style={{ height: "calc(100vh - 64px)" }}
+    >
       <div className="flex items-center gap-2 mb-4 text-lg">
         <div className="p-2 rounded-lg bg-green-500/10">
-          <Bot size={40} className="text-3xl text-green-600" />
+          <Sprout size={40} className="text-3xl text-green-600" />
         </div>
         <div className="flex flex-col">
           <span className="font-bold">AgriVerse AI Assistant</span>
@@ -109,10 +113,8 @@ export default function AiPage() {
           </p>
         </div>
       </div>
-      <div
-        style={{ height: "calc(100vh - 400px)" }}
-        className="overflow-y-scroll"
-      >
+      {/* Chat Messages */}
+      <div className="grow overflow-y-scroll pr-4">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -121,37 +123,27 @@ export default function AiPage() {
             }`}
           >
             {message.type === "ai" && (
-              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center flex-shrink-0">
-                <Sprout className="h-4 w-4 text-white" />
+              <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                <Bot className="h-5 w-6 text-green-600" />
               </div>
             )}
 
             <div
-              className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
+              className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl border ${
                 message.type === "user"
-                  ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
-                  : "bg-white border border-green-100 shadow-sm"
+                  ? "bg-blue-50 border-blue-200 text-blue-800"
+                  : "bg-green-50 border-green-200 text-green-800"
               }`}
             >
-              <p
-                className={`text-sm ${
-                  message.type === "user" ? "text-white" : "text-gray-800"
-                }`}
-              >
-                {message.text}
-              </p>
-              <p
-                className={`text-xs mt-1 ${
-                  message.type === "user" ? "text-blue-100" : "text-gray-500"
-                }`}
-              >
+              <p className={`text-sm`}>{message.text}</p>
+              <p className={`text-xs mt-1 text-muted-foreground`}>
                 {formatTime(message.timestamp)}
               </p>
             </div>
 
             {message.type === "user" && (
-              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
-                <User className="h-4 w-4 text-white" />
+              <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                <User className="h-4 w-4 text-blue-600" />
               </div>
             )}
           </div>
@@ -160,18 +152,19 @@ export default function AiPage() {
         {/* Typing Indicator */}
         {isTyping && (
           <div className="flex gap-3 animate-in slide-in-from-bottom-5">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center">
-              <Sprout className="h-4 w-4 text-white" />
+            <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
+              <Bot className="h-5 w-6 text-green-600" />
             </div>
-            <div className="bg-white border border-green-100 shadow-sm px-4 py-3 rounded-2xl">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce"></div>
+            <div className="border px-4 py-3 rounded-2xl bg-green-50 border-green-200 text-green-800">
+              <div className="flex gap-1 justify-center items-end">
+                <p className={`text-sm`}>Thinking </p>
+                <div className="w-1 h-1 bg-green-800 rounded-full animate-bounce"></div>
                 <div
-                  className="w-2 h-2 bg-green-400 rounded-full animate-bounce"
+                  className="w-1 h-1 bg-green-800 rounded-full animate-bounce"
                   style={{ animationDelay: "0.1s" }}
                 ></div>
                 <div
-                  className="w-2 h-2 bg-green-400 rounded-full animate-bounce"
+                  className="w-1 h-1 bg-green-800 rounded-full animate-bounce"
                   style={{ animationDelay: "0.2s" }}
                 ></div>
               </div>
@@ -180,7 +173,7 @@ export default function AiPage() {
         )}
         <div ref={messagesEndRef} />
       </div>
-      <div className="absolute bottom-0 flex flex-col gap-3 m-3 w-full">
+      <div className="flex flex-col gap-3">
         <div className="flex flex-wrap gap-2">
           {[
             { text: "Crop health", icon: "🌱" },

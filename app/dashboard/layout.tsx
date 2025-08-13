@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
@@ -16,7 +16,6 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 import { Separator } from "@/components/ui/separator";
 
@@ -31,7 +30,19 @@ import {
   Users,
   Bell,
   Languages,
+  Moon,
+  Sun,
+  X,
 } from "lucide-react";
+import { useTheme } from "next-themes";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 
 export default function DashboardLayout({
   children,
@@ -39,9 +50,6 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-
-  const [showNotifications, setShowNotifications] = useState(false);
-
   const items = useMemo(
     () => [
       {
@@ -129,6 +137,13 @@ export default function DashboardLayout({
   );
 
   const activeHref = pathname === "/dashboard" ? "/dashboard/ai" : pathname;
+  const theme = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <SidebarProvider>
@@ -158,8 +173,8 @@ export default function DashboardLayout({
 
         <SidebarInset>
           <header className="top-0 z-10 w-full">
-            <div className="flex h-16 items-center px-2 border-b-2 border-gray-200">
-              <SidebarTrigger className="p-6" />
+            <div className="flex h-16 items-center px-2">
+              <SidebarTrigger variant={"outline"}></SidebarTrigger>
               <Separator orientation="vertical" className="mx-3 h-8" />
               <div className="w-8 h-8 rounded-lg flex items-center justify-center">
                 <Sprout className="h-4 w-4" />
@@ -172,39 +187,63 @@ export default function DashboardLayout({
                   <Languages className="h-4 w-4" />
                   <span className="hidden sm:inline">EN</span>
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9 relative"
-                  aria-label="Notifications"
-                  onClick={() => setShowNotifications((prev) => !prev)}
+                <Drawer
+                  direction="right"
+                  open={sidebarOpen}
+                  onOpenChange={setSidebarOpen}
                 >
-                  <Bell className="h-4 w-4" />
-                </Button>
-                {showNotifications && (
-                  <Card className="absolute top-15 left-1/2 overflow-hidden">
-                    <CardHeader>Notifications</CardHeader>
-                    <CardContent className="space-y-4 text-sm">
-                      {notifications.map((note) => (
-                        <div
-                          key={note.id}
-                          className="flex items-start gap-3 p-2 rounded"
+                  <DrawerTrigger asChild>
+                    <Button variant="outline" className="relative" size="icon">
+                      {notifications.length > 0 && (
+                        <span className="absolute top-0 right-0 inline-flex items-center justify-center w-3 h-3 bg-red-500 text-white text-xs rounded-full">
+                          {notifications.length}
+                        </span>
+                      )}
+                      <Bell />
+                    </Button>
+                  </DrawerTrigger>
+                  <DrawerContent>
+                    <DrawerHeader>
+                      <div className="flex gap-2 items-center">
+                        <Button
+                          variant="outline"
+                          size={"icon"}
+                          onClick={() => setSidebarOpen(false)}
                         >
-                          <span className="text-xl">{note.icon}</span>
-                          <div>
-                            <div className="font-medium">{note.title}</div>
-                            <div className="text-xs">{note.description}</div>
-                            <div className="text-xs mt-1">{note.time}</div>
-                          </div>
+                          <X className="text-2xl" size={40} strokeWidth={3} />
+                        </Button>
+                        <DrawerTitle>Notifications</DrawerTitle>
+                      </div>
+                    </DrawerHeader>
+                    {notifications.map((note) => (
+                      <div
+                        key={note.id}
+                        className="flex items-start gap-3 p-2 rounded"
+                      >
+                        <span className="text-xl">{note.icon}</span>
+                        <div>
+                          <div className="font-medium">{note.title}</div>
+                          <div className="text-xs">{note.description}</div>
+                          <div className="text-xs mt-1">{note.time}</div>
                         </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                )}
+                      </div>
+                    ))}
+                  </DrawerContent>
+                </Drawer>
+                <Button
+                  onClick={() =>
+                    theme.setTheme(theme.theme === "dark" ? "light" : "dark")
+                  }
+                  variant={"outline"}
+                  size={"icon"}
+                >
+                  {mounted && theme.theme === "dark" && <Moon />}
+                  {mounted && theme.theme === "light" && <Sun />}
+                </Button>
               </div>
             </div>
+            <Separator />
           </header>
-
           {children}
         </SidebarInset>
       </div>
