@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+const WEBHOOK = process.env.WEBHOOK as string;
 
 export async function POST(request: NextRequest) {
   try {
-    const { message } = await request.json();
+    const { type, message } = await request.json();
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json(
@@ -11,13 +12,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const response = await fetch('https://api.example.com/chat', {
+    const webhookUrl = `${WEBHOOK}?query_format=${type}`;
+    console.log('Message Sent :', message.trim());
+    const apiResponse = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ 
+        message: message.trim(), 
+      }),
     });
+
+    if (!apiResponse.ok) {
+      throw new Error(`API responded with status: ${apiResponse.status}`);
+    }
+
+    const response = await apiResponse.json();
+
+    console.log('Chat API response:', response);
 
     return NextResponse.json({ response });
   } catch (error) {

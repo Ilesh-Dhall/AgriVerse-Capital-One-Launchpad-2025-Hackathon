@@ -1,14 +1,8 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { CloudSun } from "lucide-react";
 import { useEffect } from "react";
+import { weatherPageData as data } from "@/data/data";
 
 export default function WeatherPage() {
   useEffect(() => {
@@ -16,135 +10,70 @@ export default function WeatherPage() {
   }, []);
 
   return (
-    <article
-      id="weather"
-      className="scroll-mt-24 animate-fade-slide-in"
-      style={{ animationDelay: "0.2s" }}
+    <div
+      className="p-6 flex flex-col gap-6"
+      style={{
+        height: "calc(100vh - 64px)",
+      }}
     >
-      <Card className="card-float border-blue-200/50 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-info"></div>
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-3 text-xl">
-            <div className="p-2 rounded-lg bg-blue-500/10">
-              <CloudSun className="h-5 w-5 text-blue-600" />
+      <div className="flex items-center gap-2 mb-4 text-lg animate-in slide-in-from-bottom-5 duration-300 fade-in">
+        <div className="p-2 rounded-lg bg-blue-500/10">
+          <CloudSun size={40} className="text-3xl text-blue-600" />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-bold">Weather & Climate</span>
+          <p className="text-sm">7 day forecast and crop impact insights.</p>
+        </div>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-in slide-in-from-bottom-5 duration-300 fade-in">
+        {data.forecast.map((f, index) => (
+          <div
+            key={f.day}
+            className={`rounded-xl p-4 hover-lift border-2 group transition-all duration-300 ${
+              f.weather === "rainy"
+                ? "bg-bluish-bg border-bluish-border"
+                : f.weather === "sunny"
+                ? "bg-orange-50 dark:bg-orange-900/30 border-orange-200/50"
+                : "bg-gray-50 dark:bg-gray-900/30 border-gray-200/50"
+            }`}
+            style={{ animationDelay: `${index * 0.1}s` }}
+          >
+            <div className="text-sm font-medium text-muted-foreground mb-1">
+              {f.day}
             </div>
-            <span className="bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent font-display">
-              Weather & Climate
-            </span>
-          </CardTitle>
-          <CardDescription className="text-base">
-            7‑day forecast and crop impact insights.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              {
-                d: "Mon",
-                t: "31°C",
-                rain: "0.2mm",
-                icon: "☀️",
-                weather: "sunny",
-              },
-              {
-                d: "Tue",
-                t: "33°C",
-                rain: "—",
-                icon: "🌤️",
-                weather: "partly-cloudy",
-              },
-              {
-                d: "Wed",
-                t: "30°C",
-                rain: "1.1mm",
-                icon: "🌦️",
-                weather: "rainy",
-              },
-              {
-                d: "Thu",
-                t: "29°C",
-                rain: "—",
-                icon: "☁️",
-                weather: "cloudy",
-              },
-              {
-                d: "Fri",
-                t: "28°C",
-                rain: "2.0mm",
-                icon: "🌧️",
-                weather: "rainy",
-              },
-              {
-                d: "Sat",
-                t: "30°C",
-                rain: "—",
-                icon: "⛅",
-                weather: "partly-cloudy",
-              },
-              {
-                d: "Sun",
-                t: "31°C",
-                rain: "—",
-                icon: "☀️",
-                weather: "sunny",
-              },
-            ].map((f, index) => (
-              <div
-                key={f.d}
-                className={`rounded-xl border border-blue-100/50 p-4 hover-lift group transition-all duration-300 ${
-                  f.weather === "rainy"
-                    ? "bg-gradient-to-br from-blue-50 to-blue-100/50"
-                    : f.weather === "sunny"
-                    ? "bg-gradient-to-br from-orange-50 to-yellow-100/50"
-                    : "bg-gradient-to-br from-gray-50 to-gray-100/50"
-                }`}
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="text-sm font-medium text-muted-foreground mb-1">
-                  {f.d}
-                </div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl">{f.icon}</span>
-                  <div className="text-2xl font-bold group-hover:scale-110 transition-transform">
-                    {f.t}
-                  </div>
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  💧 Rain: {f.rain}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="rounded-xl border border-blue-100/50 p-6 bg-gradient-to-br from-blue-50/50 to-background">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="text-base font-semibold">
-                Crop Impact Forecast
-              </div>
-              <div className="px-2 py-1 rounded-full bg-blue-100 text-xs font-medium text-blue-700">
-                AI Insights
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-2xl">{f.icon}</span>
+              <div className="text-2xl font-bold group-hover:scale-110 transition-transform">
+                {f.temp}
               </div>
             </div>
-            <div className="grid gap-3">
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-background border border-blue-100">
-                <span className="text-2xl">🌾</span>
-                <div className="text-sm">
-                  <span className="font-medium">Wheat:</span> Irrigate
-                  mid‑week; avoid afternoon watering. Optimal morning
-                  hours: 6-8 AM.
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-background border border-red-100">
-                <span className="text-2xl">🍅</span>
-                <div className="text-sm">
-                  <span className="font-medium">Tomato:</span> Watch
-                  for leaf curl after Friday showers. Consider
-                  covering young plants.
-                </div>
-              </div>
+            <div className="text-xs text-muted-foreground">
+              💧 Rain: {f.rain}
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </article>
+        ))}
+      </div>
+      <div className="rounded-xl border p-6 animate-in slide-in-from-bottom-5 duration-300 fade-in">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="text-base font-semibold">Crop Impact Forecast</div>
+          <div className="px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-xs font-medium text-blue-700 dark:text-white">
+            AI Insights
+          </div>
+        </div>
+        <div className="grid gap-3 ">
+          {data.cropImpact.map((item, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-3 p-3 rounded-lg bg-background border"
+            >
+              <span className="text-2xl">{item.icon}</span>
+              <div className="text-sm">
+                <span className="font-medium">{item.crop}:</span> {item.advice}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

@@ -1,14 +1,8 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { BookOpen } from "lucide-react";
 import { useEffect } from "react";
+import { knowledgePageData as data } from "@/data/data";
 
 export default function KnowledgePage() {
   useEffect(() => {
@@ -16,113 +10,76 @@ export default function KnowledgePage() {
   }, []);
 
   return (
-    <article
-      id="knowledge"
-      className="scroll-mt-24 animate-fade-slide-in"
-      style={{ animationDelay: "0.6s" }}
+    <div
+      className="p-6 flex flex-col gap-6"
+      style={{
+        height: "calc(100vh - 64px)",
+      }}
     >
-      <Card className="card-float border-purple-200/50 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-blue-500"></div>
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-3 text-xl">
-            <div className="p-2 rounded-lg bg-purple-500/10">
-              <BookOpen className="h-5 w-5 text-purple-600" />
-            </div>
-            <span className="bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent font-display">
-              Knowledge Library
-            </span>
-          </CardTitle>
-          <CardDescription className="text-base">
-            Curated practices and policy updates.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid gap-4">
-            <div className="p-4 rounded-xl border border-purple-100/50 bg-gradient-to-br from-purple-50/30 to-background hover-lift group">
-              <div className="flex items-start gap-3">
-                <span className="text-2xl">📖</span>
-                <div className="flex-1">
-                  <div className="font-medium mb-1 group-hover:text-purple-600 transition-colors">
-                    ICAR Wheat Irrigation Guidelines
-                  </div>
-                  <div className="text-sm text-muted-foreground mb-2">
-                    Explainable steps for optimal wheat irrigation
-                    based on soil type and climate
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs px-2 py-1 rounded bg-purple-100 text-purple-700">
-                      Expert Verified
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      • 2 min read
-                    </span>
-                  </div>
+      <div className="flex items-center gap-2 mb-4 text-lg animate-in slide-in-from-bottom-5 duration-300 fade-in">
+        <div className="p-2 rounded-lg bg-purple-500/10">
+          <BookOpen size={40} className="text-3xl text-purple-600" />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-bold">Weather & Climate</span>
+          <p className="text-sm">7 day forecast and crop impact insights.</p>
+        </div>
+      </div>
+      <div className="grid gap-4">
+        {data.guides.map((guide, index) => (
+          <div
+            key={index}
+            className={
+              "p-4 rounded-xl border-2 transition-colors animate-in slide-in-from-bottom-5 duration-300 fade-in " +
+              (guide.color == "blue"
+                ? "border-blue-200 dark:border-blue-900/80 hover:bg-blue-50/50 dark:hover:bg-blue-900/30"
+                : guide.color == "green"
+                ? "border-green-400 dark:border-green-900/80 hover:bg-green-50/50 dark:hover:bg-green-900/30"
+                : "border-purple-400 dark:border-purple-900/80 hover:bg-purple-50/50 dark:hover:bg-purple-900/30")
+            }
+          >
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">{guide.icon}</span>
+              <div className="flex-1">
+                <div className="font-medium mb-1 transition-colors">
+                  {guide.title}
                 </div>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl border border-blue-100/50 bg-gradient-to-br from-blue-50/30 to-background hover-lift group">
-              <div className="flex items-start gap-3">
-                <span className="text-2xl">🌦️</span>
-                <div className="flex-1">
-                  <div className="font-medium mb-1 group-hover:text-blue-600 transition-colors">
-                    IMD District Forecast Integration
-                  </div>
-                  <div className="text-sm text-muted-foreground mb-2">
-                    How to use weather data for precise farm planning
-                    and risk management
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700">
-                      Updated Weekly
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      • 3 min read
-                    </span>
-                  </div>
+                <div className="text-sm text-muted-foreground mb-2">
+                  {guide.description}
                 </div>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl border border-green-100/50 bg-gradient-to-br from-green-50/30 to-background hover-lift group">
-              <div className="flex items-start gap-3">
-                <span className="text-2xl">🏛️</span>
-                <div className="flex-1">
-                  <div className="font-medium mb-1 group-hover:text-green-600 transition-colors">
-                    PM-KISAN & Agricultural Subsidies
-                  </div>
-                  <div className="text-sm text-muted-foreground mb-2">
-                    Complete eligibility guide and application
-                    timelines for government schemes
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs px-2 py-1 rounded bg-green-100 text-green-700">
-                      Policy Update
+                <div className="flex items-center gap-2">
+                  {guide.tags.map((tag, tagIndex) => (
+                    <span
+                      key={tagIndex}
+                      className={
+                        "text-xs px-2 py-1 rounded " +
+                        (guide.color == "blue"
+                          ? "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-50"
+                          : guide.color == "green"
+                          ? "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-50"
+                          : "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-50")
+                      }
+                    >
+                      {tag}
                     </span>
-                    <span className="text-xs text-muted-foreground">
-                      • 5 min read
-                    </span>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
+        ))}
 
-          <div className="rounded-xl border border-accent/20 p-4 bg-gradient-to-br from-accent/5 to-background">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-lg">🎯</span>
-              <div className="text-sm font-medium">
-                Personalized for You
-              </div>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Based on your crops (Wheat, Tomato) and location
-              (Nashik, MH), we've curated the most relevant
-              guides and updates.
-            </div>
+        <div className="rounded-xl border p-4 animate-in slide-in-from-bottom-5 duration-300 fade-in">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">🎯</span>
+            <div className="text-sm font-medium">Personalized for You</div>
           </div>
-        </CardContent>
-      </Card>
-    </article>
+          <div className="text-xs text-muted-foreground">
+            Based on your crops and location, we&apos;ve curated the most
+            relevant guides and updates.
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -1,14 +1,9 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { LineChart as LineChartIcon } from "lucide-react";
-import { useEffect } from "react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import { marketPageData as data } from "@/data/data";
 import {
   LineChart,
   Line,
@@ -16,168 +11,113 @@ import {
   XAxis,
   YAxis,
   Tooltip as RechartTooltip,
-  CartesianGrid,
 } from "recharts";
 
-const priceData = [
-  { day: "Mon", price: 1800 },
-  { day: "Tue", price: 1750 },
-  { day: "Wed", price: 1900 },
-  { day: "Thu", price: 2050 },
-  { day: "Fri", price: 1980 },
-  { day: "Sat", price: 2100 },
-  { day: "Sun", price: 2150 },
-];
-
 export default function MarketPage() {
+  const [selectedCrop, setSelectedCrop] = useState(data[0]);
+  const dark = useTheme().theme === "dark";
   useEffect(() => {
     document.title = "Market Intelligence — AgriVerse";
   }, []);
 
   return (
-    <article
-      id="market"
-      className="scroll-mt-24 animate-fade-slide-in"
-      style={{ animationDelay: "0.3s" }}
+    <div
+      className="p-6 flex flex-col gap-6"
+      style={{
+        height: "calc(100vh - 64px)",
+      }}
     >
-      <Card className="card-float border-green-200/50 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 to-accent"></div>
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-3 text-xl">
-            <div className="p-2 rounded-lg bg-green-500/10">
-              <LineChartIcon className="h-5 w-5 text-green-600" />
-            </div>
-            <span className="bg-gradient-to-r from-green-600 to-accent bg-clip-text text-transparent font-display">
-              Market Intelligence
-            </span>
-          </CardTitle>
-          <CardDescription className="text-base">
-            Current prices and short‑term trends.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid md:grid-cols-3 gap-4">
-            <div className="rounded-xl border border-green-100/50 p-4 bg-gradient-to-br from-green-50/50 to-green-100/30 hover-lift group">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">🍅</span>
-                <div className="text-sm font-medium text-muted-foreground">
-                  Tomato — Pune
-                </div>
-              </div>
-              <div className="text-3xl font-bold text-green-700 group-hover:scale-105 transition-transform">
-                ₹ 2,150<span className="text-sm font-normal">/q</span>
-              </div>
-              <div className="flex items-center gap-1 mt-2">
-                <span className="text-xs px-2 py-1 rounded bg-green-100 text-green-700">
-                  ↗ +15%
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  vs last week
-                </span>
+      <div className="flex items-center gap-2 mb-4 text-lg animate-in slide-in-from-bottom-5 duration-300 fade-in">
+        <div className="p-2 rounded-lg bg-green-500/10">
+          <LineChartIcon size={40} className="text-3xl text-green-600" />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-bold">Market Intelligence</span>
+          <p className="text-sm">Current prices and short-term trends.</p>
+        </div>
+      </div>
+      <div className="grid md:grid-cols-3 gap-4 animate-in slide-in-from-bottom-5 duration-300 fade-in">
+        {data.map((crop) => (
+          <div
+            onClick={() => setSelectedCrop(crop)}
+            key={crop.name}
+            className={`rounded-xl border-2 hover:bg-green-50 hover:dark:bg-green-900/30 p-4 hover:border-green-500 transition-all duration-300 cursor-pointer`}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">{crop.icon}</span>
+              <div className="text-sm font-medium text-muted-foreground">
+                {crop.name} — {crop.location}
               </div>
             </div>
-            <div className="rounded-xl border border-accent/20 p-4 bg-gradient-to-br from-accent/5 to-accent/10 hover-lift group">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">🌾</span>
-                <div className="text-sm font-medium text-muted-foreground">
-                  Wheat — Nashik
-                </div>
-              </div>
-              <div className="text-3xl font-bold text-accent-foreground group-hover:scale-105 transition-transform">
-                ₹ 2,020<span className="text-sm font-normal">/q</span>
-              </div>
-              <div className="flex items-center gap-1 mt-2">
-                <span className="text-xs px-2 py-1 rounded bg-accent/20 text-accent-foreground">
-                  → Stable
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  vs last week
-                </span>
-              </div>
+            <div
+              className={`text-3xl font-bold group-hover:scale-105 transition-transform`}
+            >
+              ₹ {crop.price.toLocaleString()}
+              <span className="text-sm font-normal">/q</span>
             </div>
-            <div className="rounded-xl border border-purple-100/50 p-4 bg-gradient-to-br from-purple-50/50 to-purple-100/30 hover-lift group">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">🧅</span>
-                <div className="text-sm font-medium text-muted-foreground">
-                  Onion — Lasalgaon
-                </div>
-              </div>
-              <div className="text-3xl font-bold text-purple-700 group-hover:scale-105 transition-transform">
-                ₹ 1,850<span className="text-sm font-normal">/q</span>
-              </div>
-              <div className="flex items-center gap-1 mt-2">
-                <span className="text-xs px-2 py-1 rounded bg-red-100 text-red-700">
-                  ↘ -8%
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  vs last week
-                </span>
-              </div>
+            <div className="flex items-center gap-1 mt-2">
+              <span className="text-xs px-2 py-1 rounded-full bg-green-100 dark:bg-green-900 text-green-700 dark:text-white">
+                {crop.change}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                vs last week
+              </span>
             </div>
           </div>
-          <div className="rounded-xl border border-green-100/50 p-6 bg-gradient-to-br from-background to-green-50/50">
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-base font-semibold">
-                Price Trend (7 days)
-              </div>
-              <div className="px-2 py-1 rounded-full bg-green-100 text-xs font-medium text-green-700">
-                Tomato
-              </div>
-            </div>
-            <div className="h-48 rounded-lg bg-background/50 p-4 border border-green-100">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={priceData}>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="hsl(var(--muted-foreground) / 0.2)"
-                  />
-                  <XAxis
-                    dataKey="day"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{
-                      fontSize: 12,
-                      fill: "hsl(var(--muted-foreground))",
-                    }}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{
-                      fontSize: 12,
-                      fill: "hsl(var(--muted-foreground))",
-                    }}
-                  />
-                  <RechartTooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--background))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="price"
-                    stroke="hsl(160 60% 45%)"
-                    strokeWidth={3}
-                    dot={{
-                      fill: "hsl(160 60% 45%)",
-                      strokeWidth: 2,
-                      r: 4,
-                    }}
-                    activeDot={{
-                      r: 6,
-                      stroke: "hsl(160 60% 45%)",
-                      strokeWidth: 2,
-                      fill: "white",
-                    }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+        ))}
+      </div>
+      <div className="rounded-xl border p-6 animate-in slide-in-from-bottom-5 duration-300 fade-in">
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-base font-semibold">Price Trend (7 days)</div>
+          <div className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-700 dark:text-white">
+            {selectedCrop.name}
           </div>
-        </CardContent>
-      </Card>
-    </article>
+        </div>
+        <div className="h-48 rounded-lg p-4 border">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={selectedCrop.priceData}>
+              <XAxis
+                domain={["dataMin", "dataMax"]}
+                dataKey="day"
+                tick={{
+                  fontSize: 12,
+                }}
+              />
+              <YAxis
+                domain={["dataMin", "dataMax"]}
+                tick={{
+                  fontSize: 12,
+                }}
+              />
+              <RechartTooltip
+                contentStyle={{
+                  borderRadius: "8px",
+                  color: dark ? "#fff" : "#000",
+                  backgroundColor: dark ? "#333" : "#fff",
+                }}
+              />
+              <Line
+                animationDuration={200}
+                type="bump"
+                dataKey="price"
+                stroke="hsl(160 60% 45%)"
+                strokeWidth={3}
+                dot={{
+                  fill: "hsl(160 60% 45%)",
+                  strokeWidth: 2,
+                  r: 4,
+                }}
+                activeDot={{
+                  r: 6,
+                  stroke: "hsl(160 60% 45%)",
+                  strokeWidth: 2,
+                  fill: "white",
+                }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </div>
   );
 }

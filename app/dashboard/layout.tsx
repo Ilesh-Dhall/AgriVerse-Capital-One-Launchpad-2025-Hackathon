@@ -15,8 +15,17 @@ import {
   SidebarInset,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-
+import { notifications, languageOptions } from "@/data/data";
 import { Separator } from "@/components/ui/separator";
 
 import {
@@ -28,6 +37,7 @@ import {
   ShieldAlert,
   BookOpen,
   Users,
+  User,
   Bell,
   Languages,
   Moon,
@@ -37,7 +47,6 @@ import {
 import { useTheme } from "next-themes";
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
@@ -95,42 +104,11 @@ export default function DashboardLayout({
         label: "Community",
         icon: Users,
       },
-    ],
-    []
-  );
-
-  const notifications = useMemo(
-    () => [
       {
-        id: "weather-alert",
-        icon: "🌧️",
-        title: "Weather Alert",
-        description:
-          "Heavy rain expected tomorrow — plan drainage for tomato fields.",
-        time: "2 hours ago",
-      },
-      {
-        id: "market-update",
-        icon: "📈",
-        title: "Market Update",
-        description: "Tomato prices up 15% — good time to sell at Pune market.",
-        time: "4 hours ago",
-      },
-      {
-        id: "subsidy-reminder",
-        icon: "📋",
-        title: "Subsidy Reminder",
-        description:
-          "Equipment subsidy deadline in 5 days — submit documents now.",
-        time: "1 day ago",
-      },
-      {
-        id: "expert-available",
-        icon: "👨‍🌾",
-        title: "Expert Available",
-        description:
-          "Dr. Sharma has slots open for crop consultation tomorrow.",
-        time: "3 days ago",
+        id: "profile",
+        href: "/dashboard/profile",
+        label: "Profile",
+        icon: User,
       },
     ],
     []
@@ -140,7 +118,7 @@ export default function DashboardLayout({
   const theme = useTheme();
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
+  const [language, setLanguage] = useState("EN");
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -183,10 +161,35 @@ export default function DashboardLayout({
                 AgriVerse Dashboard
               </div>
               <div className="ml-auto flex items-center gap-3">
-                <Button variant="outline" size="sm" className="gap-2 h-9">
-                  <Languages className="h-4 w-4" />
-                  <span className="hidden sm:inline">EN</span>
-                </Button>
+                {/* ============== */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2 h-9">
+                      <Languages className="h-4 w-4" />
+                      <span className="hidden sm:inline">{language}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuLabel>Select Language</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuRadioGroup
+                      value={language}
+                      onValueChange={setLanguage}
+                    >
+                      {languageOptions.map((lang, index) => (
+                        <DropdownMenuRadioItem
+                          key={index}
+                          value={lang.code.toUpperCase()}
+                        >
+                          {lang.label}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* ============== */}
+
                 <Drawer
                   direction="right"
                   open={sidebarOpen}
@@ -195,7 +198,7 @@ export default function DashboardLayout({
                   <DrawerTrigger asChild>
                     <Button variant="outline" className="relative" size="icon">
                       {notifications.length > 0 && (
-                        <span className="absolute top-0 right-0 inline-flex items-center justify-center w-3 h-3 bg-red-500 text-white text-xs rounded-full">
+                        <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-4 h-4 bg-red-500 text-white text-xs rounded-full">
                           {notifications.length}
                         </span>
                       )}
@@ -210,24 +213,28 @@ export default function DashboardLayout({
                           size={"icon"}
                           onClick={() => setSidebarOpen(false)}
                         >
-                          <X className="text-2xl" size={40} strokeWidth={3} />
+                          <X size={40} strokeWidth={3} />
                         </Button>
                         <DrawerTitle>Notifications</DrawerTitle>
                       </div>
                     </DrawerHeader>
-                    {notifications.map((note) => (
-                      <div
-                        key={note.id}
-                        className="flex items-start gap-3 p-2 rounded"
-                      >
-                        <span className="text-xl">{note.icon}</span>
-                        <div>
-                          <div className="font-medium">{note.title}</div>
-                          <div className="text-xs">{note.description}</div>
-                          <div className="text-xs mt-1">{note.time}</div>
+                    <div className="flex flex-col p-4 gap-3">
+                      {notifications.map((note) => (
+                        <div
+                          key={note.id}
+                          className="flex items-start gap-3 p-2 rounded-xl border"
+                        >
+                          <span className="text-xl">{note.icon}</span>
+                          <div>
+                            <div className="font-medium">{note.title}</div>
+                            <div className="text-xs">{note.description}</div>
+                            <div className="text-muted-foreground text-xs mt-1">
+                              {note.time}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </DrawerContent>
                 </Drawer>
                 <Button

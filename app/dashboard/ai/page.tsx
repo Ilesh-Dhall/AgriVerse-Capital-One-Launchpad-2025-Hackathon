@@ -3,10 +3,18 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mic, Sprout, Send, User, Bot } from "lucide-react";
+import { Mic, Send, User, Bot, Stars } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+
+interface Message {
+  id: number;
+  type: "user" | "ai";
+  text: string;
+  timestamp: Date;
+}
 
 export default function AiPage() {
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
       type: "ai",
@@ -16,6 +24,7 @@ export default function AiPage() {
   ]);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [typingMessage, setTypingMessage] = useState<Message | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = () => {
@@ -25,19 +34,83 @@ export default function AiPage() {
   useEffect(() => {
     scrollToBottom();
     document.title = "AI Farming Intelligence — AgriVerse";
-  }, [messages]);
+  }, [messages, typingMessage]);
 
-  const getAIResponse = async (userMessage: string): Promise<string> => {
+  const typeMessage = async (fullText: string, messageId: number) => {
+    const words = fullText.split(" ");
+    let currentText = "";
+
+    for (let i = 0; i < words.length; i++) {
+      currentText += (i > 0 ? " " : "") + words[i];
+
+      setTypingMessage({
+        id: messageId,
+        type: "ai",
+        text: currentText,
+        timestamp: new Date(),
+      });
+
+      // Adjust typing speed - faster for short words, slower for long words
+      const delay = words[i].length > 6 ? 150 : 100;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+
+    // Clear typing message and add to main messages
+    setTypingMessage(null);
+    const finalMessage: Message = {
+      id: messageId,
+      type: "ai",
+      text: fullText,
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, finalMessage]);
+  };
+
+  const getAIResponse = async (
+    userMessage: string,
+    chatHistory: Message[]
+  ): Promise<string> => {
     try {
+      const contextLimit = 10;
+      const recentMessages = chatHistory.slice(-contextLimit);
+      const contexualMessage = recentMessages
+        .map((msg) => ({
+          role: msg.type === "user" ? "user" : "assistant",
+          content: msg.text,
+        }))
+        .concat({
+          role: "user",
+          content: userMessage,
+        });
+
       const response = await fetch("/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: userMessage }),
+        body: JSON.stringify({
+          type: "text",
+          message: JSON.stringify(contexualMessage),
+        }),
       });
+      if (!response.ok) {
+        console.log(`HTTP error! status: ${response.status}`);
+      }
 
       const data = await response.json();
+
+      if (!data.response) {
+        return "I'm sorry, There was an error processing your request. Please try again.";
+      }
+
+      if (Array.isArray(data.response) && data.response[0]?.output) {
+        return data.response[0].output;
+      } else if (typeof data.response === "string") {
+        return data.response;
+      } else if (data.response.content || data.response.message) {
+        return data.response.content || data.response.message;
+      }
+
       return data.response;
     } catch (error) {
       console.error("Error getting AI response:", error);
@@ -48,7 +121,7 @@ export default function AiPage() {
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
 
-    const userMessage = {
+    const userMessage: Message = {
       id: Date.now(),
       type: "user",
       text: inputText,
@@ -61,27 +134,22 @@ export default function AiPage() {
     setIsTyping(true);
 
     try {
-      const aiResponseText = await getAIResponse(currentInput);
+      const aiResponseText = await getAIResponse(currentInput, messages);
+      setIsTyping(false);
 
-      const aiResponse = {
-        id: Date.now() + 1,
-        type: "ai",
-        text: aiResponseText,
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, aiResponse]);
+      const messageId = Date.now() + 1;
+      await typeMessage(aiResponseText, messageId);
     } catch (error) {
       console.error("Error in handleSendMessage:", error);
-      const errorResponse = {
+      setIsTyping(false);
+
+      const errorResponse: Message = {
         id: Date.now() + 1,
         type: "ai",
         text: "I'm sorry, I encountered an error. Please try again.",
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorResponse]);
-    } finally {
-      setIsTyping(false);
     }
   };
 
@@ -99,12 +167,14 @@ export default function AiPage() {
 
   return (
     <div
-      className="p-6 flex flex-col gap-6"
-      style={{ height: "calc(100vh - 64px)" }}
+      className="p-6 flex flex-col gap-6 mx-auto fade-in-5 animate-in duration-300"
+      style={{
+        height: "calc(100vh - 64px)",
+      }}
     >
       <div className="flex items-center gap-2 mb-4 text-lg">
         <div className="p-2 rounded-lg bg-green-500/10">
-          <Sprout size={40} className="text-3xl text-green-600" />
+          <Stars size={40} className="text-3xl text-green-600" />
         </div>
         <div className="flex flex-col">
           <span className="font-bold">AgriVerse AI Assistant</span>
@@ -114,7 +184,7 @@ export default function AiPage() {
         </div>
       </div>
       {/* Chat Messages */}
-      <div className="grow overflow-y-scroll pr-4">
+      <div className="flex flex-col gap-3 grow overflow-y-scroll pr-4">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -131,11 +201,40 @@ export default function AiPage() {
             <div
               className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl border ${
                 message.type === "user"
-                  ? "bg-blue-50 border-blue-200 text-blue-800"
-                  : "bg-green-50 border-green-200 text-green-800"
+                  ? "bg-bluish-bg text-bluish-text border-bluish-border"
+                  : "bg-greenish-bg text-greenish-text border-greenish-border"
               }`}
             >
-              <p className={`text-sm`}>{message.text}</p>
+              {message.type === "ai" ? (
+                <div className="text-md prose prose-sm max-w-none">
+                  <ReactMarkdown
+                    components={{
+                      p: ({ children }) => (
+                        <p className="mb-2 last:mb-0">{children}</p>
+                      ),
+                      strong: ({ children }) => (
+                        <strong className="font-bold">{children}</strong>
+                      ),
+                      em: ({ children }) => (
+                        <em className="italic">{children}</em>
+                      ),
+                      ul: ({ children }) => (
+                        <ul className="list-disc ml-4 mb-2">{children}</ul>
+                      ),
+                      ol: ({ children }) => (
+                        <ol className="list-decimal ml-4 mb-2">{children}</ol>
+                      ),
+                      li: ({ children }) => (
+                        <li className="mb-1">{children}</li>
+                      ),
+                    }}
+                  >
+                    {message.text}
+                  </ReactMarkdown>
+                </div>
+              ) : (
+                <p className="text-md">{message.text}</p>
+              )}
               <p className={`text-xs mt-1 text-muted-foreground`}>
                 {formatTime(message.timestamp)}
               </p>
@@ -148,6 +247,43 @@ export default function AiPage() {
             )}
           </div>
         ))}
+
+        {typingMessage && (
+          <div className="flex gap-3 animate-in slide-in-from-bottom-5 duration-300">
+            <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
+              <Bot className="h-5 w-6 text-green-600" />
+            </div>
+            <div className="max-w-xs lg:max-w-md px-4 py-3 rounded-2xl border bg-greenish-bg text-greenish-text border-greenish-border">
+              <div className="text-md prose prose-sm max-w-none">
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => (
+                      <p className="mb-2 last:mb-0">{children}</p>
+                    ),
+                    strong: ({ children }) => (
+                      <strong className="font-bold">{children}</strong>
+                    ),
+                    em: ({ children }) => (
+                      <em className="italic">{children}</em>
+                    ),
+                    ul: ({ children }) => (
+                      <ul className="list-disc ml-4 mb-2">{children}</ul>
+                    ),
+                    ol: ({ children }) => (
+                      <ol className="list-decimal ml-4 mb-2">{children}</ol>
+                    ),
+                    li: ({ children }) => <li className="mb-1">{children}</li>,
+                  }}
+                >
+                  {typingMessage.text + "🮉"}
+                </ReactMarkdown>
+              </div>
+              <p className="text-xs mt-1 text-muted-foreground">
+                {formatTime(typingMessage.timestamp)}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Typing Indicator */}
         {isTyping && (
@@ -202,7 +338,7 @@ export default function AiPage() {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder="Ask about crop health, weather, market prices, irrigation..."
-            className="flex-1 border-green-200 focus:border-green-400 focus:ring-green-400/20"
+            className="flex-1 focus:border-green-400 focus:ring-green-400/20"
             onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
           />
           <Button

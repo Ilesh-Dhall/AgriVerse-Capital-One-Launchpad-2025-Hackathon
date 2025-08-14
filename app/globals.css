@@ -48,9 +48,21 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --color-greenish-bg: var(--greenish-bg);
+  --color-greenish-border: var(--greenish-border);
+  --color-greenish-text: var(--greenish-text);
+  --color-bluish-bg: var(--bluish-bg);
+  --color-bluish-border: var(--bluish-border);
+  --color-bluish-text: var(--bluish-text);
 }
 
 :root {
+  --greenish-bg: #f0fdf4;
+  --greenish-border: #b9f8cf;
+  --greenish-text: #016630;
+  --bluish-bg: #eff6ff;
+  --bluish-border: oklch(88.2% 0.059 254.128);
+  --bluish-text: #193cb8;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
@@ -79,13 +91,19 @@
   --sidebar-foreground: oklch(0.141 0.005 285.823);
   --sidebar-primary: oklch(0.21 0.006 285.885);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.967 0.001 286.375);
+  --sidebar-accent: oklch(96.2% 0.044 156.743);
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
 }
 
 .dark {
+  --greenish-bg: oklch(26.6% 0.065 152.934);
+  --greenish-border: oklch(16.6% 0.065 152.934);
+  --greenish-text: #fff;
+  --bluish-bg: oklch(28.2% 0.091 267.935);
+  --bluish-border: oklch(18.2% 0.091 267.935);
+  --bluish-text: #fff;
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.21 0.006 285.885);
@@ -113,7 +131,7 @@
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.274 0.006 286.033);
+  --sidebar-accent: oklch(26.6% 0.065 152.934);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
@@ -130,6 +148,19 @@
 }
 .bg-gradient-primary {
   background-image: var(--gradient-primary);
+}
+
+.loadin {
+  animation: loader 500ms ease-out;
+}
+
+@keyframes loader {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 @layer base {
