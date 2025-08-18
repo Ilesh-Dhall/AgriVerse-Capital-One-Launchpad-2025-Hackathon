@@ -1,10 +1,5 @@
 import { Button } from "@/components/ui/button";
-import {
-  ArrowBigRight,
-  ArrowUpRight,
-  CircleArrowOutUpRight,
-  Leaf,
-} from "lucide-react";
+import { ArrowUpRight, Leaf } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import HeroText from "./ui/HeroText";
