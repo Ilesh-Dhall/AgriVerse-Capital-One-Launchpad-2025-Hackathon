@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { profileData } from "@/data/data";
 import {
   Card,
   CardContent,
@@ -54,22 +55,7 @@ interface UserProfile {
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState<UserProfile>({
-    name: "Rajesh Kumar",
-    age: "42",
-    profession: "Farmer",
-    location: "Nashik",
-    district: "Nashik",
-    state: "Maharashtra",
-    farmSize: "4.5",
-    farmType: "Mixed Farming",
-    experience: "15",
-    phone: "+91 98765 43210",
-    email: "rajesh.kumar@gmail.com",
-    crops: ["Wheat", "Tomato", "Onion", "Cotton"],
-    farmingMethods: ["Organic", "Drip Irrigation", "Crop Rotation"],
-    bio: "Experienced farmer focused on sustainable agriculture and modern farming techniques. Always eager to learn and share knowledge with fellow farmers.",
-  });
+  const [profile, setProfile] = useState<UserProfile>(profileData);
 
   const [editedProfile, setEditedProfile] = useState<UserProfile>(profile);
 

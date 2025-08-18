@@ -251,3 +251,20 @@ export const languageOptions = [
   { speech: "hi-IN", code: "amh", label: "አማርኛ" },
   { speech: "hi-IN", code: "hau", label: "Hausa" },
 ];
+
+export const profileData = {
+  name: "Rajesh Kumar",
+  age: "42",
+  profession: "Farmer",
+  location: "Nashik",
+  district: "Nashik",
+  state: "Maharashtra",
+  farmSize: "4.5",
+  farmType: "Mixed Farming",
+  experience: "15",
+  phone: "+91 98765 43210",
+  email: "rajesh.kumar@gmail.com",
+  crops: ["Wheat", "Tomato", "Onion", "Cotton"],
+  farmingMethods: ["Organic", "Drip Irrigation", "Crop Rotation"],
+  bio: "Experienced farmer focused on sustainable agriculture and modern farming techniques. Always eager to learn and share knowledge with fellow farmers.",
+};

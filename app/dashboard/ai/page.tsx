@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mic, MicOff, Send, User, Bot, Stars, Volume2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { profileData } from "@/data/data";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
@@ -16,12 +17,45 @@ interface Message {
   timestamp: Date;
 }
 
+// Type extension for Chrome detection
+declare global {
+  interface Window {
+    chrome?: object;
+  }
+}
+
 export default function AiPage() {
-  // Add browser detection
-  const isChrome =
-    /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-  const isSafari =
-    /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+  // Browser detection moved to state to avoid SSR mismatch
+  const [isChromium, setIsChromium] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const [microphonePermission, setMicrophonePermission] =
+    useState<string>("prompt");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsClient(true);
+
+      // Better detection for Chromium-based browsers (Chrome, Edge, Brave, etc.)
+      const isChromiumBrowser =
+        /Chrome|Chromium|CriOS|Edge|Edg/.test(navigator.userAgent) ||
+        !!window.chrome;
+
+      setIsChromium(isChromiumBrowser);
+
+      // Check microphone permission status
+      if (navigator.permissions) {
+        navigator.permissions
+          .query({ name: "microphone" as PermissionName })
+          .then((permissionStatus) => {
+            setMicrophonePermission(permissionStatus.state);
+            permissionStatus.onchange = () => {
+              setMicrophonePermission(permissionStatus.state);
+            };
+          })
+          .catch(console.error);
+      }
+    }
+  }, []);
 
   const commands = [
     {
@@ -67,14 +101,7 @@ export default function AiPage() {
     transcribing: true,
   });
 
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      type: "ai",
-      text: "Hi there! I'm your AgriVerse AI Assistant. How can I help you today?",
-      timestamp: new Date(Date.now() - 240000),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [typingMessage, setTypingMessage] = useState<Message | null>(null);
@@ -89,7 +116,6 @@ export default function AiPage() {
     document.title = "AI Farming Intelligence — AgriVerse";
   }, [messages, typingMessage]);
 
-  // Cleanup speech recognition when component unmounts
   useEffect(() => {
     return () => {
       if (listening) {
@@ -100,6 +126,20 @@ export default function AiPage() {
 
   // Add more consistent browser support for speech recognition
   useEffect(() => {
+    // Initialize speech recognition for Chromium browsers
+    if (isClient && isChromium && browserSupportsSpeechRecognition) {
+      // Pre-initialize speech recognition for Chromium
+      try {
+        if (!SpeechRecognition.getRecognition()) {
+          console.log(
+            "Initializing speech recognition for Chromium browser..."
+          );
+        }
+      } catch (error) {
+        console.warn("Failed to initialize speech recognition:", error);
+      }
+    }
+
     // On some browsers, speech recognition might stop automatically
     // This effect tries to keep it going if we want continuous mode
     if (listening && browserSupportsSpeechRecognition) {
@@ -111,15 +151,14 @@ export default function AiPage() {
           console.log("Attempting to restart speech recognition...");
           SpeechRecognition.startListening({
             continuous: true,
-            language:
-              localStorage.getItem("speech")?.toLocaleLowerCase() || "en-IN",
+            language: localStorage.getItem("speech")?.toLowerCase() || "en-US",
           });
         }
       }, 3000);
 
       return () => clearInterval(keepAliveInterval);
     }
-  }, [listening, browserSupportsSpeechRecognition]);
+  }, [listening, browserSupportsSpeechRecognition, isClient, isChromium]);
 
   const typeMessage = async (fullText: string, messageId: number) => {
     const words = fullText.split(" ");
@@ -156,7 +195,7 @@ export default function AiPage() {
     chatHistory: Message[]
   ): Promise<string> => {
     try {
-      const contextLimit = 10;
+      const contextLimit = 9;
       const recentMessages = chatHistory.slice(-contextLimit);
       const contexualMessage = recentMessages
         .map((msg) => ({
@@ -175,7 +214,12 @@ export default function AiPage() {
         },
         body: JSON.stringify({
           type: "text",
-          message: JSON.stringify(contexualMessage),
+          message: JSON.stringify(
+            "this is my profile data: " +
+              JSON.stringify(profileData) +
+              "and this is my conversation history: " +
+              JSON.stringify(contexualMessage)
+          ),
         }),
       });
       if (!response.ok) {
@@ -204,6 +248,7 @@ export default function AiPage() {
   };
 
   const handleSendMessage = async () => {
+    SpeechRecognition.stopListening();
     if (!inputText.trim()) return;
 
     const userMessage: Message = {
@@ -242,12 +287,15 @@ export default function AiPage() {
     setInputText(`Tell me about ${template.toLowerCase()} for my farm`);
   };
 
+  // Deterministic time formatting to avoid hydration mismatch
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString("en-IN", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    let hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    const minutesStr = minutes < 10 ? "0" + minutes : minutes;
+    return `${hours}:${minutesStr} ${ampm}`;
   };
 
   const playLastMessage = (id: number) => {
@@ -283,15 +331,15 @@ export default function AiPage() {
   // Enhanced permission and support checking
   useEffect(() => {
     const checkBrowserSupport = async () => {
-      // Check HTTPS requirement for Chrome
+      // Check HTTPS requirement for Chromium browsers
       if (
-        isChrome &&
+        isChromium &&
         location.protocol !== "https:" &&
         location.hostname !== "localhost"
       ) {
-        console.warn("Chrome requires HTTPS for speech recognition");
+        console.warn("Chromium browsers require HTTPS for speech recognition");
         alert(
-          "Speech recognition requires HTTPS in Chrome. Please use HTTPS or try Safari."
+          "Speech recognition requires HTTPS in Chromium browsers. Please use HTTPS or try Safari."
         );
         return;
       }
@@ -304,28 +352,41 @@ export default function AiPage() {
         return;
       }
 
-      // For Chrome, explicitly request microphone permission
-      if (isChrome) {
+      // For Chromium browsers, explicitly request microphone permission
+      if (isChromium && microphonePermission !== "granted") {
         try {
-          await navigator.mediaDevices.getUserMedia({ audio: true });
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
           console.log("Microphone permission granted");
+          // Stop the stream immediately since we just needed permission
+          stream.getTracks().forEach((track) => track.stop());
+          setMicrophonePermission("granted");
         } catch (error) {
           console.error("Microphone permission denied:", error);
           alert(
             "Microphone permission is required for voice input. Please allow access and refresh the page."
           );
+          setMicrophonePermission("denied");
         }
       }
     };
 
-    checkBrowserSupport();
-  }, [isMicrophoneAvailable, isChrome]);
+    if (isClient) {
+      checkBrowserSupport();
+    }
+  }, [isMicrophoneAvailable, isChromium, isClient, microphonePermission]);
 
   const startListening = async () => {
+    // Wait for client-side hydration
+    if (!isClient) {
+      return;
+    }
+
     // Enhanced browser support checking
     if (!browserSupportsSpeechRecognition) {
       let message = "Your browser does not support speech recognition.";
-      if (isChrome) {
+      if (isChromium) {
         message +=
           " Make sure you're using HTTPS and have granted microphone permissions.";
       } else {
@@ -335,16 +396,28 @@ export default function AiPage() {
       return;
     }
 
-    // Check if we're on HTTPS for Chrome
+    // Check if we're on HTTPS for Chromium browsers
     if (
-      isChrome &&
+      isChromium &&
       location.protocol !== "https:" &&
       location.hostname !== "localhost"
     ) {
       alert(
-        "Chrome requires HTTPS for speech recognition. Please use HTTPS or try Safari."
+        "Chromium browsers require HTTPS for speech recognition. Please use HTTPS or try Safari."
       );
       return;
+    }
+
+    // For Chromium browsers, ensure microphone permission is granted
+    if (isChromium && microphonePermission !== "granted") {
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        setMicrophonePermission("granted");
+      } catch (error) {
+        console.error("Microphone permission required:", error);
+        alert("Please grant microphone permission and try again.");
+        return;
+      }
     }
 
     if (listening) {
@@ -356,18 +429,30 @@ export default function AiPage() {
       try {
         console.log("Starting speech recognition...");
 
-        // Enhanced options for better Chrome compatibility
+        // Enhanced options for better Chromium compatibility
         const options = {
           continuous: true,
-          language: localStorage.getItem("speech")?.toLowerCase() || "en-IN",
-          interimResults: false, // Enable interim results for better responsiveness
-          maxAlternatives: 0,
+          language: localStorage.getItem("speech")?.toLowerCase() || "en-US",
+          interimResults: false,
+          maxAlternatives: 1,
         };
 
-        // Add Chrome-specific options
-        if (isChrome) {
-          options.interimResults = true; // Better for Chrome
+        // Add Chromium-specific options
+        if (isChromium) {
+          options.interimResults = true; // Better for Chromium browsers
           options.maxAlternatives = 1;
+          // Use more specific language code for Chromium
+          if (!options.language.includes("-")) {
+            options.language =
+              options.language === "en"
+                ? "en-US"
+                : options.language === "hi"
+                ? "hi-IN"
+                : options.language + "-US";
+          }
+
+          // Add a small delay for Chromium browsers to ensure proper initialization
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
 
         await SpeechRecognition.startListening(options);
@@ -385,7 +470,7 @@ export default function AiPage() {
         console.error("Error starting speech recognition:", error);
 
         let errorMessage = "There was an error starting speech recognition.";
-        if (isChrome) {
+        if (isChromium) {
           errorMessage +=
             " Make sure you're using HTTPS and have granted microphone permissions.";
         }
@@ -519,7 +604,7 @@ export default function AiPage() {
                     li: ({ children }) => <li className="mb-1">{children}</li>,
                   }}
                 >
-                  {typingMessage.text + "🮉"}
+                  {typingMessage.text + "|"}
                 </ReactMarkdown>
               </div>
               <p className="text-xs mt-1 text-muted-foreground">
@@ -595,15 +680,17 @@ export default function AiPage() {
             className={
               listening
                 ? "bg-red-600 hover:bg-red-700 animate-pulse transition-all duration-200"
-                : browserSupportsSpeechRecognition
+                : isClient && browserSupportsSpeechRecognition
                 ? "border-green-200 hover:bg-green-50 hover:border-green-300"
                 : "border-gray-300 bg-gray-100 cursor-not-allowed"
             }
             aria-label={listening ? "Stop voice input" : "Start voice input"}
             onClick={startListening}
-            disabled={!browserSupportsSpeechRecognition}
+            disabled={!isClient || !browserSupportsSpeechRecognition}
             title={
-              !browserSupportsSpeechRecognition
+              !isClient
+                ? "Loading..."
+                : !browserSupportsSpeechRecognition
                 ? "Speech recognition not supported"
                 : listening
                 ? "Stop listening"
@@ -615,30 +702,20 @@ export default function AiPage() {
             ) : (
               <Mic
                 className={`h-4 w-4 ${
-                  !browserSupportsSpeechRecognition ? "text-gray-400" : ""
+                  !isClient || !browserSupportsSpeechRecognition
+                    ? "text-gray-400"
+                    : ""
                 }`}
               />
             )}
           </Button>
-          {listening && transcript && (
-            <Button
-              onClick={() => {
-                SpeechRecognition.stopListening();
-                setTimeout(() => handleSendMessage(), 100);
-              }}
-              className="bg-blue-600 hover:bg-blue-700 transition-all duration-200 flex gap-2"
-            >
-              <Send className="h-4 w-4" />
-              Send Voice Message
-            </Button>
-          )}
           <Button
             onClick={handleSendMessage}
             disabled={!inputText.trim() || isTyping}
             className="bg-green-600 hover:bg-green-700 hover:shadow-xl transition-all duration-200"
           >
             <Send className="h-4 w-4" />
-            Ask AI
+            {listening ? "Send Voice Message:" : "Ask AI"}
           </Button>
         </div>
       </div>
