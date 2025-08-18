@@ -3,8 +3,11 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mic, Send, User, Bot, Stars } from "lucide-react";
+import { Mic, MicOff, Send, User, Bot, Stars, Volume2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 
 interface Message {
   id: number;
@@ -14,6 +17,56 @@ interface Message {
 }
 
 export default function AiPage() {
+  // Add browser detection
+  const isChrome =
+    /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+  const isSafari =
+    /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+
+  const commands = [
+    {
+      command: "clear",
+      callback: () => setInputText(""),
+    },
+    {
+      command: "send",
+      callback: () => {
+        if (inputText && inputText.trim()) {
+          handleSendMessage();
+        }
+      },
+    },
+    {
+      command: "send message",
+      callback: () => {
+        if (inputText && inputText.trim()) {
+          handleSendMessage();
+        }
+      },
+    },
+    {
+      command: ["stop listening", "stop recording"],
+      callback: () => {
+        if (listening) {
+          SpeechRecognition.stopListening();
+        }
+      },
+    },
+  ];
+
+  // Enhanced speech recognition setup
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+    isMicrophoneAvailable,
+  } = useSpeechRecognition({
+    commands,
+    clearTranscriptOnListen: false,
+    transcribing: true,
+  });
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -35,6 +88,38 @@ export default function AiPage() {
     scrollToBottom();
     document.title = "AI Farming Intelligence — AgriVerse";
   }, [messages, typingMessage]);
+
+  // Cleanup speech recognition when component unmounts
+  useEffect(() => {
+    return () => {
+      if (listening) {
+        SpeechRecognition.stopListening();
+      }
+    };
+  }, [listening]);
+
+  // Add more consistent browser support for speech recognition
+  useEffect(() => {
+    // On some browsers, speech recognition might stop automatically
+    // This effect tries to keep it going if we want continuous mode
+    if (listening && browserSupportsSpeechRecognition) {
+      // Set a 3-second check interval to ensure we're still listening
+      // This helps with browsers that might stop the recognition automatically
+      const keepAliveInterval = setInterval(() => {
+        if (!listening) {
+          // Try to restart if it stopped unexpectedly
+          console.log("Attempting to restart speech recognition...");
+          SpeechRecognition.startListening({
+            continuous: true,
+            language:
+              localStorage.getItem("speech")?.toLocaleLowerCase() || "en-IN",
+          });
+        }
+      }, 3000);
+
+      return () => clearInterval(keepAliveInterval);
+    }
+  }, [listening, browserSupportsSpeechRecognition]);
 
   const typeMessage = async (fullText: string, messageId: number) => {
     const words = fullText.split(" ");
@@ -165,6 +250,152 @@ export default function AiPage() {
     });
   };
 
+  const playLastMessage = (id: number) => {
+    const lastMessage = messages.find((msg) => msg.id === id);
+    if (lastMessage && lastMessage.type === "ai") {
+      const utterance = new SpeechSynthesisUtterance(lastMessage.text);
+      let lang = localStorage.getItem("speech")?.toLocaleLowerCase();
+      if (lang === undefined) {
+        lang = "hi-IN";
+      }
+      utterance.lang = lang;
+      speechSynthesis.speak(utterance);
+    }
+  };
+
+  // Update input text when transcript changes
+  useEffect(() => {
+    if (transcript && listening) {
+      console.log("Transcript updated:", transcript);
+      setInputText(transcript);
+    }
+  }, [transcript, listening]);
+
+  // Add tooltip or notification when microphone is not available
+  useEffect(() => {
+    if (isMicrophoneAvailable === false) {
+      alert(
+        "Microphone access is needed for voice input. Please allow access in your browser settings."
+      );
+    }
+  }, [isMicrophoneAvailable]);
+
+  // Enhanced permission and support checking
+  useEffect(() => {
+    const checkBrowserSupport = async () => {
+      // Check HTTPS requirement for Chrome
+      if (
+        isChrome &&
+        location.protocol !== "https:" &&
+        location.hostname !== "localhost"
+      ) {
+        console.warn("Chrome requires HTTPS for speech recognition");
+        alert(
+          "Speech recognition requires HTTPS in Chrome. Please use HTTPS or try Safari."
+        );
+        return;
+      }
+
+      // Check microphone availability
+      if (isMicrophoneAvailable === false) {
+        alert(
+          "Microphone access is needed for voice input. Please allow access in your browser settings."
+        );
+        return;
+      }
+
+      // For Chrome, explicitly request microphone permission
+      if (isChrome) {
+        try {
+          await navigator.mediaDevices.getUserMedia({ audio: true });
+          console.log("Microphone permission granted");
+        } catch (error) {
+          console.error("Microphone permission denied:", error);
+          alert(
+            "Microphone permission is required for voice input. Please allow access and refresh the page."
+          );
+        }
+      }
+    };
+
+    checkBrowserSupport();
+  }, [isMicrophoneAvailable, isChrome]);
+
+  const startListening = async () => {
+    // Enhanced browser support checking
+    if (!browserSupportsSpeechRecognition) {
+      let message = "Your browser does not support speech recognition.";
+      if (isChrome) {
+        message +=
+          " Make sure you're using HTTPS and have granted microphone permissions.";
+      } else {
+        message += " Please try Chrome (with HTTPS) or Safari.";
+      }
+      alert(message);
+      return;
+    }
+
+    // Check if we're on HTTPS for Chrome
+    if (
+      isChrome &&
+      location.protocol !== "https:" &&
+      location.hostname !== "localhost"
+    ) {
+      alert(
+        "Chrome requires HTTPS for speech recognition. Please use HTTPS or try Safari."
+      );
+      return;
+    }
+
+    if (listening) {
+      console.log("Stopping speech recognition...");
+      SpeechRecognition.stopListening();
+    } else {
+      resetTranscript();
+
+      try {
+        console.log("Starting speech recognition...");
+
+        // Enhanced options for better Chrome compatibility
+        const options = {
+          continuous: true,
+          language: localStorage.getItem("speech")?.toLowerCase() || "en-IN",
+          interimResults: false, // Enable interim results for better responsiveness
+          maxAlternatives: 0,
+        };
+
+        // Add Chrome-specific options
+        if (isChrome) {
+          options.interimResults = true; // Better for Chrome
+          options.maxAlternatives = 1;
+        }
+
+        await SpeechRecognition.startListening(options);
+
+        console.log("Speech recognition active - speak now");
+
+        // Focus input field
+        setTimeout(() => {
+          const inputField = document.querySelector("input");
+          if (inputField) {
+            inputField.focus();
+          }
+        }, 100);
+      } catch (error) {
+        console.error("Error starting speech recognition:", error);
+
+        let errorMessage = "There was an error starting speech recognition.";
+        if (isChrome) {
+          errorMessage +=
+            " Make sure you're using HTTPS and have granted microphone permissions.";
+        }
+        errorMessage += " Please try again.";
+
+        alert(errorMessage);
+      }
+    }
+  };
+
   return (
     <div
       className="p-6 flex flex-col gap-6 mx-auto fade-in-5 animate-in duration-300"
@@ -235,9 +466,22 @@ export default function AiPage() {
               ) : (
                 <p className="text-md">{message.text}</p>
               )}
-              <p className={`text-xs mt-1 text-muted-foreground`}>
-                {formatTime(message.timestamp)}
-              </p>
+              <div className="flex items-end justify-between">
+                <p className={`text-xs mt-1 text-muted-foreground`}>
+                  {formatTime(message.timestamp)}
+                </p>
+                {message.type === "ai" && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => playLastMessage(message.id)}
+                    className="text-muted-foreground hover:text-black dark:hover:text-white"
+                    aria-label="Play message"
+                  >
+                    <Volume2 size={16} />
+                  </Button>
+                )}
+              </div>
             </div>
 
             {message.type === "user" && (
@@ -337,18 +581,57 @@ export default function AiPage() {
           <Input
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="Ask about crop health, weather, market prices, irrigation..."
+            placeholder={
+              listening
+                ? "Speak now..."
+                : "Ask about crop health, weather, market prices, irrigation..."
+            }
             className="flex-1 focus:border-green-400 focus:ring-green-400/20"
             onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
           />
           <Button
-            variant="outline"
+            variant={listening ? "default" : "outline"}
             size="icon"
-            className="border-green-200 hover:bg-green-50 hover:border-green-300"
-            aria-label="Voice input"
+            className={
+              listening
+                ? "bg-red-600 hover:bg-red-700 animate-pulse transition-all duration-200"
+                : browserSupportsSpeechRecognition
+                ? "border-green-200 hover:bg-green-50 hover:border-green-300"
+                : "border-gray-300 bg-gray-100 cursor-not-allowed"
+            }
+            aria-label={listening ? "Stop voice input" : "Start voice input"}
+            onClick={startListening}
+            disabled={!browserSupportsSpeechRecognition}
+            title={
+              !browserSupportsSpeechRecognition
+                ? "Speech recognition not supported"
+                : listening
+                ? "Stop listening"
+                : "Start voice input"
+            }
           >
-            <Mic className="h-4 w-4" />
+            {listening ? (
+              <MicOff className="h-4 w-4 text-white" />
+            ) : (
+              <Mic
+                className={`h-4 w-4 ${
+                  !browserSupportsSpeechRecognition ? "text-gray-400" : ""
+                }`}
+              />
+            )}
           </Button>
+          {listening && transcript && (
+            <Button
+              onClick={() => {
+                SpeechRecognition.stopListening();
+                setTimeout(() => handleSendMessage(), 100);
+              }}
+              className="bg-blue-600 hover:bg-blue-700 transition-all duration-200 flex gap-2"
+            >
+              <Send className="h-4 w-4" />
+              Send Voice Message
+            </Button>
+          )}
           <Button
             onClick={handleSendMessage}
             disabled={!inputText.trim() || isTyping}

@@ -119,6 +119,15 @@ export default function DashboardLayout({
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [language, setLanguage] = useState("EN");
+
+  useEffect(() => {
+    languageOptions.forEach((lang) => {
+      if (lang.code.toUpperCase() === language) {
+        localStorage.setItem("speech", lang.speech);
+      }
+    });
+  }, [language]);
+
   useEffect(() => {
     setMounted(true);
   }, []);
