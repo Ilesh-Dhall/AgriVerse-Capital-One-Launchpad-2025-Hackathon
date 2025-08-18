@@ -5,6 +5,7 @@ node_modules/
 # Environment
 .env
 venv
+certificates
 
 # Cache
 __pycache__/
