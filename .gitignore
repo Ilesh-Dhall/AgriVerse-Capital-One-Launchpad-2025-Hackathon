@@ -11,7 +11,6 @@ certificates
 __pycache__/
 
 # Vector Database
-embeddings/
 processed
 
 
@@ -57,8 +56,7 @@ node_modules/
 # Virtual Environment
 venv
 
-# Chroma Database
-embeddings/
+icar_db/
 
 # Data
 processed/
