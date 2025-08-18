@@ -24,8 +24,8 @@ const Trust = () => {
         </div>
         <div className="flex flex-wrap items-center justify-center gap-3 mt-6 text-sm">
           <span className="px-3 py-1 rounded border">ICAR</span>
-          <span className="px-3 py-1 rounded border">IMD</span>
-          <span className="px-3 py-1 rounded border">Agri Data Portal</span>
+          <span className="px-3 py-1 rounded border">openweathermap</span>
+          <span className="px-3 py-1 rounded border">data.gov.in</span>
           <span className="px-3 py-1 rounded border">FAO</span>
         </div>
       </div>

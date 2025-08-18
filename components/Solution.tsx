@@ -52,10 +52,14 @@ const QueryDemo = () => {
           placeholder="Ask naturally in your language…"
           className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
-        <Button variant="hero" onClick={generate} className="w-full sm:w-auto">
+        <Button
+          variant="outline"
+          onClick={generate}
+          className="w-full sm:w-auto"
+        >
           Ask AgriVerse
         </Button>
-        <div className="rounded-md border bg-background p-3 text-sm min-h-24 whitespace-pre-wrap animate-fade-in">
+        <div className="rounded-md border bg-background p-3 text-sm min-h-24 animate-fade-in">
           {answer}
         </div>
       </div>

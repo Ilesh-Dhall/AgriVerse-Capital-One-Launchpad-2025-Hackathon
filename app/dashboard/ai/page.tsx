@@ -101,7 +101,14 @@ export default function AiPage() {
     transcribing: true,
   });
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: 1,
+      type: "ai",
+      text: "Hi there! I'm your AgriVerse AI Assistant. How can I help you today?",
+      timestamp: new Date(Date.now() - 240000),
+    },
+  ]);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [typingMessage, setTypingMessage] = useState<Message | null>(null);

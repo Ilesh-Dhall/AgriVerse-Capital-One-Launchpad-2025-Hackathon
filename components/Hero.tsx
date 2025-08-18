@@ -101,22 +101,22 @@ const Hero = () => {
                   ICAR
                 </Badge>
               </Link>
-              <Link href={"https://mausam.imd.gov.in/"} target="_blank">
+              <Link href={"https://openweathermap.org/"} target="_blank">
                 <Badge
                   variant="default"
                   className="bg-green-100 text-green-800 border-2 border-green-900"
                 >
                   <ArrowUpRight className="size-4" strokeWidth={3} />
-                  IMD
+                  openweathermap
                 </Badge>
               </Link>
-              <Link href={""} target="_blank">
+              <Link href={"https://data.gov.in/"} target="_blank">
                 <Badge
                   variant="default"
                   className="bg-green-100 text-green-800 border-2 border-green-900"
                 >
                   <ArrowUpRight className="size-4" strokeWidth={3} />
-                  Agri Data Portal
+                  data.gov.in
                 </Badge>
               </Link>
             </div>

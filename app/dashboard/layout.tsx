@@ -86,12 +86,12 @@ export default function DashboardLayout({
         label: "Finance",
         icon: Wallet,
       },
-      {
-        id: "health",
-        href: "/dashboard/health",
-        label: "Crop Health",
-        icon: ShieldAlert,
-      },
+      // {
+      //   id: "health",
+      //   href: "/dashboard/health",
+      //   label: "Crop Health",
+      //   icon: ShieldAlert,
+      // },
       {
         id: "knowledge",
         href: "/dashboard/knowledge",

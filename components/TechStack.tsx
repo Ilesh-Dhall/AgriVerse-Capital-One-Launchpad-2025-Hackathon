@@ -12,10 +12,10 @@ const TechStack = () => {
       <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
         <span className="px-3 py-1 rounded border">React</span>
         <span className="px-3 py-1 rounded border">TypeScript</span>
-        <span className="px-3 py-1 rounded border">Supabase</span>
+        <span className="px-3 py-1 rounded border">ChromaDB</span>
         <span className="px-3 py-1 rounded border">LLM/RAG</span>
         <span className="px-3 py-1 rounded border">Vector Search</span>
-        <span className="px-3 py-1 rounded border">Telemetry</span>
+        <span className="px-3 py-1 rounded border">N8N</span>
       </div>
     </section>
   );
