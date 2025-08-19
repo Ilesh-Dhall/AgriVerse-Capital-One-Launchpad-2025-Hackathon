@@ -1,26 +1,26 @@
-import { NextRequest, NextResponse } from 'next/server';
-const WEBHOOK = "http://localhost:5678/webhook/my-endpoint";
+import { NextRequest, NextResponse } from "next/server";
+const WEBHOOK = process.env.WEBHOOK;
 
 export async function POST(request: NextRequest) {
   try {
     const { type, message } = await request.json();
 
-    if (!message || typeof message !== 'string') {
+    if (!message || typeof message !== "string") {
       return NextResponse.json(
-        { error: 'Message is required' },
+        { error: "Message is required" },
         { status: 400 }
       );
     }
 
     const webhookUrl = `${WEBHOOK}?query_format=${type}`;
-    console.log('Message Sent :', message.trim());
+    console.log("Message Sent :", message.trim());
     const apiResponse = await fetch(webhookUrl, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ 
-        message: message.trim(), 
+      body: JSON.stringify({
+        message: message.trim(),
       }),
     });
 
@@ -30,13 +30,13 @@ export async function POST(request: NextRequest) {
 
     const response = await apiResponse.json();
 
-    console.log('Chat API response:', response);
+    console.log("Chat API response:", response);
 
     return NextResponse.json({ response });
   } catch (error) {
-    console.error('Chat API error:', error);
+    console.error("Chat API error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
