@@ -1,0 +1,588 @@
+{
+  "name": "AgriVerse-n8n-Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [-1264, 176],
+      "id": "3e6203ae-cd4b-4c5e-9913-8d6faa43d1a0",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "cLfBndvKmtvDVEpK",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "5DayForecast",
+        "cityName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('City', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.openWeatherMapTool",
+      "typeVersion": 1,
+      "position": [-576, 464],
+      "id": "35d85f62-180f-41fe-9f1d-6ec6f3d46bbc",
+      "name": "OpenWeatherMap",
+      "alwaysOutputData": false,
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "ZuPf0V4RS9jrcErf",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Makes an HTTP request and returns vectors from Chroma database.",
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/query",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "top_k",
+              "value": "3"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [496, 480],
+      "id": "fb786e35-395f-4f36-aecb-5c789ba1ac4f",
+      "name": "queryVectorDB"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Makes an HTTP request and returns the Variety-wise Daily Market Prices Data of Commodity\n",
+        "url": "https://api.data.gov.in/resource/35985678-0d79-46b4-9ed6-6f13308a1d24?api-key=579b464db66ec23bdd0000010d890e83012f463b5e0cef4bd9043114&format=json",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "filters[State]",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "filters[District]",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', ``, 'string') }}"
+            },
+            {
+              "name": "filters[Commodity]",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters2_Value', ``, 'string') }}"
+            },
+            {
+              "name": "filters[Arrival_Date]",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters3_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {},
+        "optimizeResponse": true
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [0, 416],
+      "id": "f77d0c54-3d25-4798-8901-05b502595a55",
+      "name": "GetCommodityPrice"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Makes an HTTP request and returns the Current Daily Price of Various Commodities from Various Markets (Mandi)",
+        "url": "https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b&format=json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "format",
+              "value": "json"
+            },
+            {
+              "name": "limit",
+              "value": "10"
+            },
+            {
+              "name": "filters[state.keyword]",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters3_Value', ``, 'string') }}"
+            },
+            {
+              "name": "=filters[district]",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters4_Value', ``, 'string') }}"
+            },
+            {
+              "name": "filters[commodity]",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters5_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {},
+        "optimizeResponse": true,
+        "dataField": "="
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [-224, 416],
+      "id": "7be7db28-fb5f-437d-b9e8-08749a38df36",
+      "name": "GetMandiPrice"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "my-endpoint",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {
+          "binaryPropertyName": "audio",
+          "rawBody": false
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-800, -96],
+      "id": "261f0fce-c393-4bd5-aba7-c2e1fc383ac8",
+      "name": "Webhook",
+      "webhookId": "1a28743f-1c7b-43e6-acb4-79bfd16aaafc",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [-784, 464],
+      "id": "4896cc01-6ce6-4d5d-a8ba-fee3535e3e6a",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "cLfBndvKmtvDVEpK",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [-1104, 176],
+      "id": "4212d890-39b5-45a1-b309-f4e068da8a93",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('System_Message', ``, 'string') }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [-752, 240],
+      "id": "46382288-3c65-41a3-9e46-ceeeda7f4dc8",
+      "name": "Weather & Geo Location Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.message }}",
+        "options": {
+          "systemMessage": "<role> You are the Orchestrator Agent, a specialized AI system that coordinates multiple agricultural assistant agents. Your role is to understand the user’s query, decide which specialized agent(s) to call, gather their outputs, and deliver a clear, concise, and reliable agricultural advisory response. </role>\n\n<instructions>\n\n<core_instruction>\nStep 1: Always translate the user’s input into English first, regardless of whether it is in Hindi, Punjabi, Hinglish, or any other language. After translation, proceed with the remaining steps.\n</core_instruction>\n\n<goal> Your primary goal is to provide **actionable, fact-based advice** by intelligently combining the strengths of different agents. You must: - Route weather-related queries to the **Weather & Geo Location Agent**. - Route market price queries to the **Market Price Retriever**. - Route soil/crop practice queries to the **Crop & Agri Assistant**. - Route policy, subsidy, or finance queries to the **Policy & Finance Assistant**. - When queries span multiple domains (e.g., “Which crop should I grow in loamy soil in Dehradun, and what’s the current mandi price for it?”), combine the outputs from multiple agents before responding. </goal> <context> You coordinate **four specialized agents**:\n\nWeather & Geo Location Agent – Uses OpenWeather API to provide real-time & forecast weather.\n\nMarket Price Retriever – Fetches mandi and commodity prices.\n\nCrop & Agri Assistant – Uses queryVectorDB to suggest suitable crops and agricultural practices.\n\nPolicy & Finance Assistant – Finds relevant schemes, policies, and financial aid.\n\nMandatory rules:\n\nSmart Routing: Always send the query to the most relevant agent(s).\n\nNo Assumptions: If critical details (like soil type, location, or crop name) are missing, ask the user for clarification before proceeding.\n\nSingle Source of Truth: Only use responses from connected agents; do not invent or hallucinate.\n\nConciseness: Summarize into a direct, user-ready advisory. Do not include raw API responses or unnecessary text.\n\nConflict Handling: If different agents provide conflicting outputs, state the limitations and highlight the most reliable recommendation.\n\n</context>\n\n<output_format>\n\nDirect Answer First: Start with the most relevant, concise recommendation (e.g., “Given Dehradun’s forecasted rainfall, paddy is a suitable crop, and mandi prices for paddy are currently ₹1800/quintal.”).\n\nStructured Support: If needed, follow with a brief bullet list or table explaining reasoning (weather, soil, or price factors).\n\nTone: Professional, factual, and confident — like a trusted agricultural advisor. Also if the input is in Hindi you will ans in hindi !very Important - Match the input language in output \n</output_format>\n\n</instructions>"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [0, -96],
+      "id": "dbadcdb2-bc31-4235-b01f-7c3b1a3bf925",
+      "name": "Orchestrator Agent",
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=You are a helpful AI Policy and Finance assistant that provides advice on how to manage your expenses and latest agriculture related schemes and plociies provided by the Indian Government.\n\nPass the user query to queryFinanceVectorDB and give appropriate output from it."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [784, 192],
+      "id": "f1de17a4-6d37-410f-907e-93d3fe811b43",
+      "name": "Policy & Finance Assistant"
+    },
+    {
+      "parameters": {
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=You are a Market Price Retriever agent. Your task is to fetch the current mandi and commodity prices based on the user's query. Provide the price for the specified commodity in the given location\n\nFor getMandiPrice\nAkways pass the State first, then district and at last the commodity\nfor example: \nquery: What is the current mandi price for tomato in Ludhiana, Punjab?\npass it as: Punjab, Ludhiana, Tomato"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [-272, 192],
+      "id": "f014513c-a54a-450b-81ee-4c587ddb71ba",
+      "name": "Market Price Retriever"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [-112, 384],
+      "id": "0405a496-2621-4c0b-991b-e98d385b8884",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [-320, 576],
+      "id": "20367f9f-61c0-4091-80cd-51aeb8fc4f02",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "cLfBndvKmtvDVEpK",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [240, 480],
+      "id": "4b5e56c2-fc7a-4da2-aa34-713fcb21b151",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "cLfBndvKmtvDVEpK",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [784, 400],
+      "id": "d427603a-13f9-4255-a9c3-1e7e899f8445",
+      "name": "Google Gemini Chat Model4",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "cLfBndvKmtvDVEpK",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 544,
+        "width": 496,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [-368, 176],
+      "typeVersion": 1,
+      "id": "ff811f95-5cdd-423e-b447-19e79eafd9cb",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 544,
+        "width": 496,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [144, 176],
+      "typeVersion": 1,
+      "id": "bf4f1ea5-2c78-442b-8a76-6516bb47ba04",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 544,
+        "width": 496,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [656, 176],
+      "typeVersion": 1,
+      "id": "e72b59e7-fa7b-4c67-a15c-faa1defa7f3e",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 544,
+        "width": 496,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [-880, 176],
+      "typeVersion": 1,
+      "id": "f419da64-3002-473c-aab7-5f7eae51c009",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=You are a helpful AI agricultural assistant that provides advice on crop varieties based on weather conditions.\n\nFor example:\nfor query like: Given the current weather in Delhi (overcast clouds, 29.63°C, 67% humidity, 4.83 m/s wind), what variety of rice should I go for?\n\nPass something like this to the queryVectorDB -> pass it like this: what variety of rice should I go for with weather having and overcast humidity?"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [288, 240],
+      "id": "9f918689-836e-4cb2-b475-12e72ccacf19",
+      "name": "Crop & Agri Assistant"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Makes an HTTP request and returns vectors from Chroma database.",
+        "method": "POST",
+        "url": "http://127.0.0.2:8001/query",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "top_k",
+              "value": "3"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [976, 400],
+      "id": "45c31ba7-124c-4b4d-b3ee-77bbd07915c8",
+      "name": "queryFinanceVectorDB"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeatherMap": {
+      "ai_tool": [
+        [
+          {
+            "node": "Weather & Geo Location Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "queryVectorDB": {
+      "ai_tool": [
+        [
+          {
+            "node": "Crop & Agri Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetCommodityPrice": {
+      "ai_tool": [
+        [
+          {
+            "node": "Market Price Retriever",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetMandiPrice": {
+      "ai_tool": [
+        [
+          {
+            "node": "Market Price Retriever",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Weather & Geo Location Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weather & Geo Location Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Policy & Finance Assistant": {
+      "ai_tool": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Market Price Retriever": {
+      "ai_tool": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "Market Price Retriever",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Market Price Retriever",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Crop & Agri Assistant",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Policy & Finance Assistant",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Orchestrator Agent": {
+      "main": [[]]
+    },
+    "Crop & Agri Assistant": {
+      "ai_tool": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "queryFinanceVectorDB": {
+      "ai_tool": [
+        [
+          {
+            "node": "Policy & Finance Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f3c3c799-3e83-41ac-aaf6-e153791aea68",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5130648e6597a9fdacb2b0a6880043f2e488acc46bd58c9fb621f70a7839b9cc"
+  },
+  "id": "zC48LTFVYXLicnwp",
+  "tags": []
+}
