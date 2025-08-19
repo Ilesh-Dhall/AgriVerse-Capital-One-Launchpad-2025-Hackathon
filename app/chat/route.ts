@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-const WEBHOOK = process.env.WEBHOOK as string;
+const WEBHOOK = "http://localhost:5678/webhook/my-endpoint";
 
 export async function POST(request: NextRequest) {
   try {
