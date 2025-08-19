@@ -1,6 +1,5 @@
 import json
 from langchain.schema import Document
-from langchain.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -29,5 +28,3 @@ vectorstore = Chroma.from_documents(
     embeddings,
     persist_directory="./embeddings/datagovin_db"
 )
-
-

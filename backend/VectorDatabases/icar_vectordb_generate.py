@@ -1,11 +1,8 @@
-import glob
-from langchain.document_loaders import PyPDFLoader
+import json
+from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
-
-import json
-from langchain.schema import Document
 
 with open("./data/icar/data.json", "r") as f:
     json_data = json.load(f)
@@ -31,5 +28,3 @@ vectorstore = Chroma.from_documents(
     embeddings,
     persist_directory="./embeddings/icar_db"
 )
-
-

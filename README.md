@@ -1,10 +1,12 @@
 # 🌾 AgriVerse
 **Smart Multi-Agent Agricultural Intelligence Platform**
 
+[![n8n](https://img.shields.io/badge/n8n-v1.71+-orange.svg)](https://n8n.io/)
 [![Python](https://img.shields.io/badge/python-v3.12+-blue.svg)](https://www.python.org/downloads/)
 [![React](https://img.shields.io/badge/react-v18+-blue.svg)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/typescript-v5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![FastAPI](https://img.shields.io/badge/fastapi-v0.100+-green.svg)](https://fastapi.tiangolo.com/)
-
+[![Node.js](https://img.shields.io/badge/node.js-v22+-green.svg)](https://nodejs.org/)
 ## 🎯 About AgriVerse
 
 AgriVerse is a comprehensive AI-powered agricultural advisory platform that revolutionizes farming intelligence through a sophisticated **multi-agent system**. Built for the **Capital One Launchpad 2025 Hackathon**, this platform democratizes agricultural expertise by making advanced AI accessible to farmers, agricultural specialists, researchers, and policymakers worldwide.
@@ -34,7 +36,7 @@ graph TD
     G[OpenWeatherMap API] --> C
     H[Data.gov.in APIs] --> C
     I[GetMandiPrice Calculator] --> D
-    J[GetCommodityPrice Calculator] --> D
+    J[GetCommodityPrice] --> D
     K[QueryVectorDB] --> E
     L[QueryFinanceVectorDB] --> F
     
@@ -81,12 +83,13 @@ graph TD
 | **Frontend** | Nextjs + TypeScript | Modern, responsive user interface |
 | **Backend** | FastAPI + Python 3.12+ | High-performance API server |
 | **AI Engine** | Google Gemini 2.0 Flash | Advanced language understanding |
+| **Pipelining** | Langchain | Simplifying Embedding and Vector Generation |
 | **Vector Database** | ChromaDB | Semantic search and knowledge retrieval |
 | **Embeddings** | HuggingFace Sentence Transformer (all-MiniLM-L6-v2) | Text embedding generation |
 | **Weather Data** | OpenWeatherMap API | Real-time weather and location intelligence |
 | **Market Data** | data.gov.in APIs | Live mandi and commodity pricing |
 | **Policy Data** | data.gov.in + Vector DB | Government schemes and financial guidance |
-| **Agent Framework** | Custom Multi-Agent System | Intelligent query orchestration |
+| **Agent Framework** | n8n | Intelligent query orchestration |
 
 ---
 
@@ -124,7 +127,7 @@ You'll need to obtain the following API keys:
 ### 1. Clone the Repository
 
 ```bash
-https://github.com/Ilesh-Dhall/AgriVerse-Capital-One-Launchpad-2025-Hackathon.git
+git clone https://github.com/Ilesh-Dhall/AgriVerse-Capital-One-Launchpad-2025-Hackathon.git
 cd AgriVerse-Capital-One-Launchpad-2025
 ```
 
@@ -143,15 +146,9 @@ source venv/bin/activate
 ```
 
 #### Install Dependencies
+**Note:** If you have **GPU** then change the **Pytorch version manually** in ```requirements.txt``` file. For Exact Version refer to [Pytorch Website](https://pytorch.org/get-started/locally).
 ```bash
 pip install -r requirements.txt
-```
-
-#### Configure Environment Variables (Optional)
-By Default `.env` file points to webook address of n8n workflow but can be changed as per wish:
-
-```env
-WEBHOOK=http://localhost:5678/webhook/my-endpoint
 ```
 
 #### Download the Vector Databases
@@ -160,18 +157,57 @@ chmod +x vectordb_setup.sh
 ./vectordb_setup.sh
 ```
 
-#### Start the Backend Servers
+To build it from scratch instead [refer here](). (Optional)
+
+#### Start the Backend Servers (RAG Vector Databases)
+**In Terminal 1 (from root) run:**
 ```bash
-uvicorn main:app --reload --host 127.0.0.1 --port 8000
+cd backend/VectorDatabases/db_endpoints
+python3 -m uvicorn query_service_icar:app --reload --host 127.0.0.1 --port 8000
 ```
 
 The backend API will be available at: `http://127.0.0.1:8000`
 
-### 3. Frontend Setup
-
-#### Navigate to Frontend Directory (New Terminal)
+**In Terminal 2 (from root) run:**
 ```bash
-cd frontend
+cd backend/VectorDatabases/db_endpoints
+python3 -m uvicorn query_service_datagovin:app --reload --host 127.0.0.2 --port 8001
+```
+
+The backend API will be available at: `http://127.0.0.2:8001`
+
+---
+### 3. n8n Setup (Agent Workflow):
+
+#### Install and Start n8n
+In a new terminal in your home directory run:
+```bash
+npx n8n
+```
+This command will run a n8n instance locally without downloading all dependencies.
+
+To get detailed instruction refer to [n8n official github repository](https://github.com/n8n-io/n8n).
+
+
+#### Import AgriVerse Workflow
+1. Open n8n at `http://localhost:5678`
+2. Create a free n8n account (get free commercial license from settings)
+3. Create a **blank workflow**
+4. Click **three-dot menu** → **Import from file**
+5. Select `AgriVerse-n8n-Workflow.json` from project root
+
+#### Configure Credentials
+1. **Google Gemini**: Click any Gemini node → Create New Credential → Add your API key
+2. **OpenWeatherMap**: Click OpenWeatherMap node → Create New Credential → Add API key in Access Token field
+3. **Activate the workflow** by clicking the toggle switch in menu bar
+
+---
+
+### 3. Frontend Setup 
+
+#### Navigate to root Directory (New Terminal)
+```bash
+ cd AgriVerse-Capital-One-Launchpad-2025-Hackathon/
 ```
 
 #### Install Dependencies
@@ -181,10 +217,10 @@ npm install
 
 #### Start Development Server
 ```bash
-npm run dev
+npm dev
 ```
 
-The frontend will be available at: `http://localhost:5173`
+The frontend will be available at: `http://localhost:3000`
 
 ---
 
@@ -194,20 +230,25 @@ The frontend will be available at: `http://localhost:5173`
 
 **English:**
 ```
-"What's the current market price for wheat in Punjab mandis?"
+What's the current market price for Tomato in Ludhiana Punjab mandis?
 ```
 
 **Hindi:**
 ```
-"आज टमाटर का भाव क्या है और मौसम कैसा रहेगा?"
+मुझे चावल की किस्मों के बारे में बताइए।
 ```
 
-**Regional Language:**
+**Hinglish:**
 ```
-"Government subsidies available for organic farming in Maharashtra"
+Baarish wale mausum me kis type ki fasal achi rhegi?
 ```
+**Punjabi:**
+```
+ਗੰਨੇ ਨੂੰ ਸਿੰਚਾਈ ਕਿਵੇਂ ਕਰਨੀ ਚਾਹੀਦੀ ਹੈ?
+```
+and many more...
 
-### How It Works
+### 🤔 How It Works 
 
 1. **Query Processing**: The Orchestrator Agent receives and analyzes your query
 2. **Language Detection**: Automatic detection and translation if needed
@@ -222,134 +263,35 @@ The frontend will be available at: `http://localhost:5173`
 
 ---
 
-## 📁 Project Structure
 
-```
-AgriVerse-Capital-One-Launchpad-2025/
-├── backend/
-│   ├── main.py                    # FastAPI application entry point
-│   ├── agents/
-│   │   ├── __init__.py
-│   │   ├── orchestrator.py        # Main orchestrator agent
-│   │   ├── weather_geo_agent.py   # Weather & geographical analysis
-│   │   ├── market_price_agent.py  # Market price retrieval specialist
-│   │   ├── crop_agri_agent.py     # Crop management and agriculture
-│   │   └── policy_finance_agent.py # Policy and financial guidance
-│   ├── vectorstore/
-│   │   ├── __init__.py
-│   │   ├── setup.py               # Vector database initialization
-│   │   └── queries.py             # Search and retrieval functions
-│   ├── api/
-│   │   ├── __init__.py
-│   │   ├── weather.py             # OpenWeatherMap API integration
-│   │   ├── market_prices.py       # Mandi and commodity price APIs
-│   │   └── government.py          # Data.gov.in integration
-│   ├── data/
-│   │   ├── crop_knowledge/         # Agricultural best practices
-│   │   ├── policy_documents/       # Government schemes and policies
-│   │   ├── market_data/           # Historical price trends
-│   │   └── weather_patterns/       # Seasonal weather analysis
-│   ├── utils/
-│   │   ├── __init__.py
-│   │   ├── language.py            # Multilingual support
-│   │   └── helpers.py             # Utility functions
-│   ├── requirements.txt           # Python dependencies
-│   └── .env.example              # Environment variables template
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── ChatInterface.jsx  # Main chat component
-│   │   │   ├── WeatherWidget.jsx  # Weather display
-│   │   │   ├── MarketPrices.jsx   # Market price display
-│   │   │   └── LanguageSelector.jsx # Language selection
-│   │   ├── pages/
-│   │   │   ├── Home.jsx           # Landing page
-│   │   │   └── Dashboard.jsx      # Main application
-│   │   ├── services/
-│   │   │   └── api.js             # Backend API integration
-│   │   ├── utils/
-│   │   │   └── constants.js       # Application constants
-│   │   ├── App.jsx                # Main React component
-│   │   └── main.jsx               # Application entry point
-│   ├── public/
-│   │   └── index.html
-│   ├── package.json               # Frontend dependencies
-│   └── vite.config.js            # Vite configuration
-├── docs/
-│   ├── API.md                     # API documentation
-│   ├── AGENTS.md                  # Agent system documentation
-│   └── DEPLOYMENT.md              # Deployment guide
-├── README.md                      # This file
-├── LICENSE                        # MIT License
-└── .gitignore                    # Git ignore rules
-```
----
-
-## 🚀 Deployment
-
-### Docker Deployment
-
-```bash
-# Build and run with Docker Compose
-docker-compose up --build
-```
-
-### Production Deployment
-
-Detailed deployment instructions are available in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
-
----
 
 ## 📊 Performance Metrics
 
-- **Response Time**: < 2 seconds average
+- **Response Time**: < 10 seconds average
 - **Multilingual Support**: 12+ languages
-- **Accuracy**: 94%+ for agricultural queries
-- **Scalability**: Handles 1000+ concurrent users
-
----
-
-## 🤝 Contributing
-
-We welcome contributions from the community! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
-
-### Development Workflow
-
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
-
----
-
-## 🔮 Roadmap
-
-- [ ] **Mobile Application** - React Native app for farmers
-- [ ] **IoT Integration** - Sensor data integration for real-time monitoring
-- [ ] **Voice Interface** - Speech-to-text for low-literacy users
-- [ ] **Offline Support** - Critical features without internet connectivity
-- [ ] **Advanced Analytics** - Crop yield prediction and optimization
-- [ ] **Marketplace Integration** - Connect farmers with buyers and suppliers
+- **Reliability**: 100% sourced from government data.
 
 ---
 
 ## 🏆 Hackathon Submission Details
 
-**Event**: Capital One Launchpad 2025 Hackathon  
+**Event**: Capital One Launchpad 2025 Hackathon
+**Event URL:** capitalone.hackerearth.com  
 **Theme**: Exploring and Building Agentic AI Solutions for a High-Impact Area of Society: Agriculture  
 
 AgriVerse represents the future of agricultural technology, where advanced AI becomes accessible to every farmer, regardless of their technical background or language.
 
----
 
-## 👥 Team
+### 👥 Team
+
+#### **Team Name:** NameError
 
 | S. No. | Name  |
 |------|----------------|
-| **1** | Ilesh Dhall |
-| **2** | Prakhar Singh |
+| **1** | [Ilesh Dhall](https://github.com/Ilesh-Dhall) |
+| **2** | [Prakhar Singh](https://github.com/PrakharSinghOnGit) |
 
+---
 
 ## 🙏 Acknowledgments
 
@@ -361,13 +303,6 @@ AgriVerse represents the future of agricultural technology, where advanced AI be
 
 ---
 
-## 📞 Support & Contact
-
-- **GitHub Issues**: [Report bugs or request features](https://github.com/your-username/AgriVerse/issues)
-- **Documentation**: [Full documentation](https://agriverse-docs.example.com)
-- **Demo**: [Live demo](https://agriverse-demo.example.com)
-
----
 
 <div align="center">
 
@@ -375,7 +310,7 @@ AgriVerse represents the future of agricultural technology, where advanced AI be
 
 *Empowering agriculture through intelligent AI agents.*
 
-[![Star this repo](https://img.shields.io/github/stars/your-username/AgriVerse?style=social)](https://github.com/your-username/AgriVerse)
-[![Follow us](https://img.shields.io/github/followers/your-username?style=social)](https://github.com/your-username)
+[![Star this repo](https://img.shields.io/github/stars/Ilesh-Dhall/AgriVerse-Capital-One-Launchpad-2025-Hackathon?style=social)](https://github.com/Ilesh-Dhall/AgriVerse-Capital-One-Launchpad-2025-Hackathon.git)
+[![Follow us](https://img.shields.io/github/followers/Ilesh-Dhall?style=social)](https://github.com/Ilesh-Dhall)
 
 </div>
