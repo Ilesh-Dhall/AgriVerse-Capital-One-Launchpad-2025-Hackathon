@@ -1,0 +1,10 @@
+torch
+torchvision
+langchain
+langchain-core
+langchain-community
+langchain-text-splitters
+chromadb
+fastapi
+uvicorn
+pydantic
