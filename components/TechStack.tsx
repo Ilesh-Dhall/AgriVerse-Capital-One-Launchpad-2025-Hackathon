@@ -61,7 +61,10 @@ const technologies = [
 
 const TechStack = () => {
   return (
-    <section id="tech" className="container mx-auto py-16 md:py-24 relative">
+    <section
+      id="tech"
+      className="container mx-auto py-16 md:py-24 relative px-4 sm:px-6"
+    >
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="h-full w-full bg-[radial-gradient(circle_at_2px_2px,#6366f1_1px,transparent_0)] bg-[size:30px_30px]" />

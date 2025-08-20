@@ -71,7 +71,7 @@ const Solution = () => {
   return (
     <section
       id="solution"
-      className="container mx-auto py-16 md:py-24 relative"
+      className="container mx-auto py-16 md:py-24 relative px-4 sm:px-6"
     >
       {/* Background Elements */}
       <div className="absolute inset-0 opacity-5">

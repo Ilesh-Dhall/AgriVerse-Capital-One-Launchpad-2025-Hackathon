@@ -9,7 +9,10 @@ import {
 
 const Trust = () => {
   return (
-    <section id="trust" className="container mx-auto py-16 md:py-24 relative">
+    <section
+      id="trust"
+      className="container mx-auto py-16 md:py-24 relative px-4 sm:px-6"
+    >
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="h-full w-full bg-[radial-gradient(circle_at_2px_2px,#3b82f6_1px,transparent_0)] bg-[size:25px_25px]" />

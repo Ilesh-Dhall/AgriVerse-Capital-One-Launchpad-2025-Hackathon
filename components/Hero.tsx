@@ -24,7 +24,7 @@ const Hero = () => {
   }, []);
 
   return (
-    <header className="relative overflow-hidden min-h-screen">
+    <header className="relative overflow-hidden min-h-screen px-4 sm:px-6">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Floating Animation Orbs */}

@@ -11,8 +11,8 @@ import Link from "next/link";
 
 const Footer = () => {
   return (
-    <footer className="border-t bg-gradient-to-br from-gray-50 to-green-50 dark:from-gray-950 dark:to-green-950/30">
-      <div className="container mx-auto py-16">
+    <footer className="border-t bg-gradient-to-br from-gray-50 to-green-50 dark:from-gray-950 dark:to-green-950/30 px-4 sm:px-6">
+      <div className="container mx-auto py-16 px-0">
         <div className="grid lg:grid-cols-4 gap-8 mb-12">
           {/* Brand Section */}
           <div className="lg:col-span-2">

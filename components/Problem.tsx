@@ -35,7 +35,10 @@ const questions = [
 
 const Problem = () => {
   return (
-    <section id="problem" className="container mx-auto py-16 md:py-24 relative">
+    <section
+      id="problem"
+      className="container mx-auto py-16 md:py-24 relative px-4 sm:px-6"
+    >
       <div className="absolute inset-0 opacity-5">
         <div className="h-full w-full bg-[radial-gradient(circle_at_1px_1px,#0f172a_1px,transparent_0)] bg-[size:20px_20px]" />
       </div>

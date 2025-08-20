@@ -9,7 +9,10 @@ import {
 
 const Accessibility = () => {
   return (
-    <section id="access" className="container mx-auto py-16 md:py-24 relative">
+    <section
+      id="access"
+      className="container mx-auto py-16 md:py-24 relative px-4 sm:px-6"
+    >
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="h-full w-full bg-[radial-gradient(circle_at_1px_1px,#10b981_1px,transparent_0)] bg-[size:20px_20px]" />
