@@ -130,8 +130,19 @@ You'll need to obtain the following API keys:
 git clone https://github.com/Ilesh-Dhall/AgriVerse-Capital-One-Launchpad-2025-Hackathon.git
 cd AgriVerse-Capital-One-Launchpad-2025
 ```
+### 2. Create Environment Configuration
 
-### 2. Backend Setup
+Create a `.env` file in the root directory with the required webhook URL (leave default unless required):
+
+```bash
+# Create .env file
+touch .env
+
+# Add webhook configuration
+echo "WEBHOOK=http://localhost:5678/webhook-test/my-endpoint" > .env
+```
+
+### 3. Backend Setup
 
 #### Create and Activate Virtual Environment
 ```bash
@@ -157,7 +168,7 @@ chmod +x vectordb_setup.sh
 ./vectordb_setup.sh
 ```
 
-To build it from scratch instead [refer here](). (Optional)
+To build it from scratch instead [refer here](#-manual-vector-database-setup-optional). (Optional)
 
 #### Start the Backend Servers (RAG Vector Databases)
 **In Terminal 1 (from root) run:**
@@ -177,7 +188,7 @@ python3 -m uvicorn query_service_datagovin:app --reload --host 127.0.0.2 --port 
 The backend API will be available at: `http://127.0.0.2:8001`
 
 ---
-### 3. n8n Setup (Agent Workflow):
+### 4. n8n Setup (Agent Workflow):
 
 #### Install and Start n8n
 In a new terminal in your home directory run:
@@ -203,7 +214,7 @@ To get detailed instruction refer to [n8n official github repository](https://gi
 
 ---
 
-### 3. Frontend Setup 
+### 5. Frontend Setup 
 
 #### Navigate to root Directory (New Terminal)
 ```bash
@@ -293,6 +304,62 @@ AgriVerse represents the future of agricultural technology, where advanced AI be
 
 ---
 
+## 🔧 Manual Vector Database Setup (Optional)
+
+If you prefer to build the vector databases from scratch instead of downloading pre-built ones, you can use the provided scripts. This process may take longer but gives you full control over the database creation.
+
+### Prerequisites for Manual Setup
+- Ensure you have all backend dependencies installed (`pip install -r requirements.txt`)
+- Have sufficient disk space (the process may require several GB for processing documents)
+- Stable internet connection for downloading source data
+
+### Building the Databases
+
+#### 1. ICAR Agricultural Knowledge Database
+```bash
+cd backend/VectorDatabases
+python3 icar_vectordb_generate.py
+```
+
+This script will:
+- Download and process ICAR agricultural research documents
+- Generate embeddings using HuggingFace Sentence Transformer
+- Create the ChromaDB vector database for crop and agricultural knowledge
+- Store the database in the appropriate directory structure
+
+#### 2. Data.gov.in Policy & Finance Database
+```bash
+cd backend/VectorDatabases
+python3 datagovin_vectordb_generate.py
+```
+
+This script will:
+- Fetch government policy and financial scheme data from data.gov.in APIs
+- Process and clean the policy documents
+- Generate embeddings for financial and policy content
+- Create the ChromaDB vector database for government schemes and subsidies
+
+### ⏱️ Expected Build Times
+- **ICAR Database**: 15-30 minutes
+- **Data.gov.in Database**: 5 minutes
+
+### 🔍 Verification
+After building, verify your databases are working:
+```bash
+# Test ICAR database
+cd backend/VectorDatabases/db_endpoints
+python3 -m uvicorn query_service_icar:app --reload --host 127.0.0.1 --port 8000
+
+# Test Data.gov.in database (in another terminal)
+python3 -m uvicorn query_service_datagovin:app --reload --host 127.0.0.2 --port 8001
+```
+
+Visit `http://127.0.0.1:8000/docs` and `http://127.0.0.2:8001/docs` to test the API endpoints.
+
+**Note**: If you encounter any issues during manual setup, you can always fall back to the pre-built databases using the `vectordb_setup.sh` script.
+
+---
+
 ## 🙏 Acknowledgments
 
 - **Capital One Launchpad** for organizing this impactful hackathon
@@ -302,7 +369,6 @@ AgriVerse represents the future of agricultural technology, where advanced AI be
 - **Data.gov.in** for government agricultural datasets
 
 ---
-
 
 <div align="center">
 
